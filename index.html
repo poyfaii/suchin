@@ -237,10 +237,15 @@
             <!-- Monthly Summary Tab -->
             <div id="monthlyContent" class="tab-content hidden">
                 <div class="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-4 md:p-8 border border-white/50">
-                    <h2 class="text-2xl md:text-3xl font-kanit font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6 md:mb-8 text-center flex items-center justify-center gap-3">
-                        <span class="text-3xl md:text-4xl">📊</span>
-                        <span>สรุปค่าใช้จ่ายรายเดือน</span>
-                    </h2>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 md:mb-8 gap-4">
+                        <h2 class="text-2xl md:text-3xl font-kanit font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent text-center sm:text-left flex items-center justify-center sm:justify-start gap-3">
+                            <span class="text-3xl md:text-4xl">📊</span>
+                            <span>สรุปค่าใช้จ่ายรายเดือน</span>
+                        </h2>
+                        <button onclick="clearAllData()" class="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white px-4 py-2 rounded-xl font-kanit font-semibold text-sm transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            🗑️ ล้างข้อมูลทั้งหมด
+                        </button>
+                    </div>
                     <div id="monthlySummary" class="space-y-4 md:space-y-6">
                         <!-- Monthly data will be populated here -->
                     </div>
@@ -250,10 +255,15 @@
             <!-- Yearly Summary Tab -->
             <div id="yearlyContent" class="tab-content hidden">
                 <div class="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-4 md:p-8 border border-white/50">
-                    <h2 class="text-2xl md:text-3xl font-kanit font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-6 md:mb-8 text-center flex items-center justify-center gap-3">
-                        <span class="text-3xl md:text-4xl">📈</span>
-                        <span>สรุปค่าใช้จ่ายรายปี</span>
-                    </h2>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 md:mb-8 gap-4">
+                        <h2 class="text-2xl md:text-3xl font-kanit font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent text-center sm:text-left flex items-center justify-center sm:justify-start gap-3">
+                            <span class="text-3xl md:text-4xl">📈</span>
+                            <span>สรุปค่าใช้จ่ายรายปี</span>
+                        </h2>
+                        <button onclick="clearAllData()" class="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white px-4 py-2 rounded-xl font-kanit font-semibold text-sm transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            🗑️ ล้างข้อมูลทั้งหมด
+                        </button>
+                    </div>
                     <div id="yearlySummary" class="space-y-6 md:space-y-8">
                         <!-- Yearly data will be populated here -->
                     </div>
@@ -773,18 +783,28 @@
                 
                 const [month, year] = key.split('-');
                 monthCard.innerHTML = `
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6 gap-4">
                         <div class="text-center sm:text-left">
                             <h3 class="text-xl md:text-2xl font-kanit font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                                 ${month} พ.ศ. ${year}
                             </h3>
                             <p class="text-gray-600 text-sm mt-1">${Object.keys(data).length} รายการ</p>
                         </div>
-                        <div class="text-center sm:text-right">
-                            <div class="text-2xl md:text-3xl font-kanit font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                ${total.toLocaleString()}
+                        <div class="flex flex-col sm:flex-row items-center gap-3">
+                            <div class="text-center">
+                                <div class="text-2xl md:text-3xl font-kanit font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                    ${total.toLocaleString()}
+                                </div>
+                                <div class="text-gray-600 text-sm">บาท</div>
                             </div>
-                            <div class="text-gray-600 text-sm">บาท</div>
+                            <div class="flex gap-2">
+                                <button onclick="editMonthData('${key}')" class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 transform hover:scale-105 shadow-md">
+                                    ✏️ แก้ไข
+                                </button>
+                                <button onclick="deleteMonthData('${key}')" class="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 transform hover:scale-105 shadow-md">
+                                    🗑️ ลบ
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="space-y-2">
@@ -904,6 +924,80 @@
             }
         }
 
+        function editMonthData(monthKey) {
+            const [month, year] = monthKey.split('-');
+            
+            // Switch to input tab
+            showTab('input');
+            
+            // Set the month and year selectors
+            document.getElementById('monthSelect').value = month;
+            document.getElementById('yearSelect').value = year;
+            
+            // Load the data
+            loadExpenseData();
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            showNotification(`กำลังแก้ไขข้อมูล ${month} พ.ศ. ${year}`, 'info');
+        }
+        
+        function deleteMonthData(monthKey) {
+            const [month, year] = monthKey.split('-');
+            
+            if (confirm(`คุณต้องการลบข้อมูลทั้งหมดของ ${month} พ.ศ. ${year} หรือไม่?\n\nการดำเนินการนี้ไม่สามารถย้อนกลับได้`)) {
+                delete expenseData[monthKey];
+                localStorage.setItem('expenseData', JSON.stringify(expenseData));
+                
+                // Update the current view
+                updateMonthlySummary();
+                updateYearlySummary();
+                
+                // If currently viewing this month, clear the inputs
+                const currentMonth = document.getElementById('monthSelect').value;
+                const currentYear = document.getElementById('yearSelect').value;
+                const currentKey = `${currentMonth}-${currentYear}`;
+                
+                if (currentKey === monthKey) {
+                    loadExpenseData();
+                }
+                
+                showNotification(`ลบข้อมูล ${month} พ.ศ. ${year} สำเร็จ!`, 'success');
+            }
+        }
+        
+        function clearAllData() {
+            const confirmMessage = `⚠️ คำเตือน: การลบข้อมูลทั้งหมด\n\nคุณต้องการลบข้อมูลค่าใช้จ่ายทั้งหมดหรือไม่?\n\nข้อมูลที่จะถูกลบ:\n• ข้อมูลค่าใช้จ่ายทุกเดือนและทุกปี\n• หมวดหมู่ที่กำหนดเองทั้งหมด\n• การตั้งค่าต่างๆ\n\n⚠️ การดำเนินการนี้ไม่สามารถย้อนกลับได้!`;
+            
+            if (confirm(confirmMessage)) {
+                const doubleConfirm = confirm('กรุณายืนยันอีกครั้ง\n\nคุณแน่ใจหรือไม่ที่จะลบข้อมูลทั้งหมด?');
+                
+                if (doubleConfirm) {
+                    // Clear all data from localStorage
+                    localStorage.removeItem('expenseData');
+                    localStorage.removeItem('customCategories');
+                    localStorage.removeItem('hiddenCategories');
+                    
+                    // Reset variables
+                    expenseData = {};
+                    customCategories = {};
+                    
+                    // Re-render everything
+                    renderCategories();
+                    loadExpenseData();
+                    updateMonthlySummary();
+                    updateYearlySummary();
+                    
+                    // Show success message with animation
+                    showNotification('🎉 ลบข้อมูลทั้งหมดสำเร็จ! เริ่มต้นใหม่ได้เลย', 'success');
+                    
+                    // Switch to input tab
+                    showTab('input');
+                }
+            }
+        }
+
         // Event listeners
         document.getElementById('monthSelect').addEventListener('change', loadExpenseData);
         document.getElementById('yearSelect').addEventListener('change', loadExpenseData);
@@ -915,5 +1009,5 @@
         loadExpenseData();
         calculateTotal();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96f59712268545c0',t:'MTc1NTIyODM4My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96f5b72f55ba10ca',t:'MTc1NTIyOTY5OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
