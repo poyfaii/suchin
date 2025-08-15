@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จัดการค่าใช้จ่ายรายเดือน</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap');
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .font-kanit { font-family: 'Kanit', sans-serif; }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .bounce-in {
+            animation: bounceIn 0.6s ease-out;
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .glow {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+        
+        .category-card {
+            background: linear-gradient(145deg, #ffffff, #f0f9ff);
+            border: 1px solid #e0f2fe;
+        }
+        
+        .expense-input:hover .category-card {
+            background: linear-gradient(145deg, #f0f9ff, #e0f2fe);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-6 bounce-in">
+                <div class="bg-white/15 backdrop-blur-xl rounded-3xl p-6 md:p-8 shadow-2xl border border-white/20 relative overflow-hidden">
+                    <!-- Background decoration -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+                    <div class="absolute -bottom-10 -left-10 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+                    
+                    <div class="relative z-10">
+                        <!-- Main title with gradient text -->
+                        <div class="mb-4">
+                            <div class="text-4xl md:text-6xl mb-2">💰</div>
+                            <h1 class="text-3xl md:text-5xl font-kanit font-bold text-white mb-2 drop-shadow-2xl leading-tight">
+                                จัดการค่าใช้จ่าย
+                            </h1>
+                            <h2 class="text-xl md:text-2xl font-kanit font-medium text-white/90 drop-shadow-lg">
+                                รายเดือน
+                            </h2>
+                        </div>
+                        
+                        <p class="text-white/85 text-base md:text-lg font-medium mb-6 max-w-md mx-auto leading-relaxed">
+                            บันทึกและติดตามค่าใช้จ่ายของคุณ<br class="hidden md:block">อย่างง่ายดายและมีประสิทธิภาพ
+                        </p>
+                        
+                        <!-- Feature badges - responsive grid -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto">
+                            <div class="bg-white/20 backdrop-blur-sm px-4 py-3 rounded-2xl text-white text-sm font-medium border border-white/20 hover:bg-white/25 transition-all duration-300">
+                                <div class="text-lg mb-1">📊</div>
+                                <div>วิเคราะห์รายจ่าย</div>
+                            </div>
+                            <div class="bg-white/20 backdrop-blur-sm px-4 py-3 rounded-2xl text-white text-sm font-medium border border-white/20 hover:bg-white/25 transition-all duration-300">
+                                <div class="text-lg mb-1">📈</div>
+                                <div>ติดตามแนวโน้ม</div>
+                            </div>
+                            <div class="bg-white/20 backdrop-blur-sm px-4 py-3 rounded-2xl text-white text-sm font-medium border border-white/20 hover:bg-white/25 transition-all duration-300">
+                                <div class="text-lg mb-1">💾</div>
+                                <div>บันทึกอัตโนมัติ</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="bg-white/20 backdrop-blur-lg rounded-2xl shadow-2xl p-2 md:p-3 border border-white/30 slide-in mb-4">
+                <!-- Mobile: 2x2 grid, Desktop: horizontal -->
+                <div class="grid grid-cols-2 md:flex md:justify-center gap-2">
+                    <button onclick="showTab('input')" id="inputTab" class="tab-btn px-3 md:px-6 py-3 md:py-4 rounded-xl font-kanit font-semibold text-sm md:text-base transition-all duration-300 bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform hover:scale-105 glow">
+                        <div class="flex flex-col md:flex-row items-center gap-1 md:gap-2">
+                            <span class="text-lg md:text-base">📝</span>
+                            <span class="text-xs md:text-base leading-tight">กรอกข้อมูล</span>
+                        </div>
+                    </button>
+                    <button onclick="showTab('monthly')" id="monthlyTab" class="tab-btn px-3 md:px-6 py-3 md:py-4 rounded-xl font-kanit font-semibold text-sm md:text-base transition-all duration-300 bg-white/30 text-white hover:bg-white/40 transform hover:scale-105">
+                        <div class="flex flex-col md:flex-row items-center gap-1 md:gap-2">
+                            <span class="text-lg md:text-base">📊</span>
+                            <span class="text-xs md:text-base leading-tight">รายเดือน</span>
+                        </div>
+                    </button>
+                    <button onclick="showTab('yearly')" id="yearlyTab" class="tab-btn px-3 md:px-6 py-3 md:py-4 rounded-xl font-kanit font-semibold text-sm md:text-base transition-all duration-300 bg-white/30 text-white hover:bg-white/40 transform hover:scale-105">
+                        <div class="flex flex-col md:flex-row items-center gap-1 md:gap-2">
+                            <span class="text-lg md:text-base">📈</span>
+                            <span class="text-xs md:text-base leading-tight">รายปี</span>
+                        </div>
+                    </button>
+                    <button onclick="exportToExcel()" class="tab-btn px-3 md:px-6 py-3 md:py-4 rounded-xl font-kanit font-semibold text-sm md:text-base transition-all duration-300 bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg transform hover:scale-105 hover:shadow-xl">
+                        <div class="flex flex-col md:flex-row items-center gap-1 md:gap-2">
+                            <span class="text-lg md:text-base">📄</span>
+                            <span class="text-xs md:text-base leading-tight">Excel</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Input Tab -->
+            <div id="inputContent" class="tab-content">
+                <div class="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-4 md:p-8 mb-4 md:mb-6 border border-white/50 card-hover">
+                    <!-- Date Selection - Mobile optimized -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 md:mb-8">
+                        <div>
+                            <label class="block text-sm font-kanit font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                <span class="text-lg">📅</span>
+                                <span>เดือน</span>
+                            </label>
+                            <select id="monthSelect" class="w-full border-2 border-blue-200 rounded-xl px-4 md:px-6 py-3 md:py-4 focus:ring-4 focus:ring-blue-300 focus:border-blue-500 transition-all duration-300 bg-gradient-to-r from-blue-50 to-indigo-50 font-medium shadow-lg text-base">
+                                <option value="มกราคม">มกราคม</option>
+                                <option value="กุมภาพันธ์">กุมภาพันธ์</option>
+                                <option value="มีนาคม">มีนาคม</option>
+                                <option value="เมษายน">เมษายน</option>
+                                <option value="พฤษภาคม">พฤษภาคม</option>
+                                <option value="มิถุนายน">มิถุนายน</option>
+                                <option value="กรกฎาคม">กรกฎาคม</option>
+                                <option value="สิงหาคม">สิงหาคม</option>
+                                <option value="กันยายน">กันยายน</option>
+                                <option value="ตุลาคม">ตุลาคม</option>
+                                <option value="พฤศจิกายน">พฤศจิกายน</option>
+                                <option value="ธันวาคม">ธันวาคม</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-kanit font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                <span class="text-lg">🗓️</span>
+                                <span>ปี พ.ศ.</span>
+                            </label>
+                            <select id="yearSelect" class="w-full border-2 border-purple-200 rounded-xl px-4 md:px-6 py-3 md:py-4 focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all duration-300 bg-gradient-to-r from-purple-50 to-pink-50 font-medium shadow-lg text-base">
+                                <!-- Years will be populated by JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Add New Category Section -->
+                    <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-4 md:p-6 mb-6 md:mb-8 border-2 border-emerald-200 shadow-lg">
+                        <h3 class="text-lg md:text-xl font-kanit font-bold text-emerald-800 mb-4 flex items-center gap-2">
+                            <span class="text-xl">✨</span>
+                            <span>เพิ่มหมวดหมู่ใหม่</span>
+                        </h3>
+                        <div class="space-y-3 md:space-y-0 md:flex md:gap-4">
+                            <input type="text" id="newCategoryName" placeholder="ชื่อหมวดหมู่ (เช่น ค่าอาหาร)" class="w-full md:flex-1 md:min-w-64 border-2 border-emerald-300 rounded-xl px-4 md:px-6 py-3 focus:ring-4 focus:ring-emerald-400 focus:border-emerald-500 transition-all duration-300 bg-white shadow-md font-medium text-base">
+                            <div class="flex gap-3">
+                                <input type="text" id="newCategoryIcon" placeholder="ไอคอน 🍽️" class="flex-1 md:w-24 md:flex-none border-2 border-emerald-300 rounded-xl px-4 py-3 focus:ring-4 focus:ring-emerald-400 focus:border-emerald-500 transition-all duration-300 bg-white shadow-md font-medium text-center text-base">
+                                <button onclick="addNewCategory()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-6 md:px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg font-kanit font-semibold text-sm md:text-base whitespace-nowrap">
+                                    ➕ เพิ่ม
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expense Categories -->
+                    <div id="expenseCategories" class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-6">
+                        <!-- Categories will be populated here -->
+                    </div>
+
+                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-4 md:p-6 border-2 border-blue-200 shadow-lg">
+                        <div class="text-center mb-6">
+                            <div class="text-base md:text-lg font-kanit font-medium text-gray-600 mb-2 flex items-center justify-center gap-2">
+                                <span class="text-xl">💰</span>
+                                <span>ยอดรวมทั้งหมด</span>
+                            </div>
+                            <div class="text-3xl md:text-4xl font-kanit font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent pulse-animation">
+                                <span id="totalAmount">0</span> บาท
+                            </div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                            <button onclick="clearAllInputs()" class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-kanit font-semibold px-4 md:px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg text-sm md:text-base">
+                                <div class="flex items-center justify-center gap-2">
+                                    <span>🗑️</span>
+                                    <span>ล้างข้อมูล</span>
+                                </div>
+                            </button>
+                            <button onclick="saveExpense()" class="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-kanit font-semibold px-4 md:px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg glow text-sm md:text-base">
+                                <div class="flex items-center justify-center gap-2">
+                                    <span>💾</span>
+                                    <span>บันทึกข้อมูล</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly Summary Tab -->
+            <div id="monthlyContent" class="tab-content hidden">
+                <div class="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-4 md:p-8 border border-white/50">
+                    <h2 class="text-2xl md:text-3xl font-kanit font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6 md:mb-8 text-center flex items-center justify-center gap-3">
+                        <span class="text-3xl md:text-4xl">📊</span>
+                        <span>สรุปค่าใช้จ่ายรายเดือน</span>
+                    </h2>
+                    <div id="monthlySummary" class="space-y-4 md:space-y-6">
+                        <!-- Monthly data will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yearly Summary Tab -->
+            <div id="yearlyContent" class="tab-content hidden">
+                <div class="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-4 md:p-8 border border-white/50">
+                    <h2 class="text-2xl md:text-3xl font-kanit font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-6 md:mb-8 text-center flex items-center justify-center gap-3">
+                        <span class="text-3xl md:text-4xl">📈</span>
+                        <span>สรุปค่าใช้จ่ายรายปี</span>
+                    </h2>
+                    <div id="yearlySummary" class="space-y-6 md:space-y-8">
+                        <!-- Yearly data will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize data storage
+        let expenseData = JSON.parse(localStorage.getItem('expenseData')) || {};
+        let customCategories = JSON.parse(localStorage.getItem('customCategories')) || {};
+        
+        // Generate years dynamically based on current year
+        function generateYears() {
+            const currentYear = new Date().getFullYear();
+            const buddhistYear = currentYear + 543;
+            const yearSelect = document.getElementById('yearSelect');
+            yearSelect.innerHTML = '';
+            
+            // Generate 5 years before and 5 years after current year
+            for (let i = buddhistYear - 5; i <= buddhistYear + 5; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `พ.ศ. ${i}`;
+                if (i === buddhistYear) {
+                    option.selected = true;
+                }
+                yearSelect.appendChild(option);
+            }
+        }
+        
+        // Set current month
+        function setCurrentMonth() {
+            const currentMonth = new Date().getMonth();
+            const months = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 
+                          'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+            document.getElementById('monthSelect').value = months[currentMonth];
+        }
+
+        // Default categories
+        const defaultCategories = {
+            mother: { label: '👵 ให้แม่ยุวดี', icon: '👵' },
+            mobile: { label: '📱 ค่าเน็ตมือถือ', icon: '📱' },
+            internet: { label: '🏠 ค่าเน็ตบ้าน', icon: '🏠' },
+            motorcycle: { label: '🏍️ ค่ามอไซ CBR', icon: '🏍️' },
+            phone: { label: '☎️ ค่าโทรศัพท์พ่อ', icon: '☎️' },
+            computer: { label: '💻 ค่าคอม', icon: '💻' },
+            youtube: { label: '🎵 YouTube Premium', icon: '🎵' },
+            phoneInstallment: { label: '📱 ค่าผ่อนโทรศัพท์', icon: '📱' },
+            car: { label: '🚗 ค่ารถยนต์', icon: '🚗' },
+            fan: { label: '🌀 ค่าพัดลมไอน้ำแม่', icon: '🌀' },
+            insurance: { label: '🛡️ ประกันรถยนต์', icon: '🛡️' },
+            secondPhone: { label: '📞 ค่าเน็ตเบอร์ 0834743399', icon: '📞' }
+        };
+
+        // Merge default and custom categories, excluding hidden ones
+        function getAllCategories() {
+            const hiddenCategories = JSON.parse(localStorage.getItem('hiddenCategories')) || [];
+            const filteredDefaults = Object.fromEntries(
+                Object.entries(defaultCategories).filter(([key]) => !hiddenCategories.includes(key))
+            );
+            return { ...filteredDefaults, ...customCategories };
+        }
+
+        // Predefined data from your input
+        const predefinedData = {
+            "ตุลาคม-2566": {
+                mother: 5000, mobile: 1517, internet: 984, motorcycle: 5384, phone: 600, computer: 2000
+            },
+            "พฤศจิกายน-2566": {
+                mother: 5000, mobile: 1483, internet: 641, motorcycle: 5384, phone: 600, computer: 2000
+            },
+            "ธันวาคม-2566": {
+                mother: 1000, mobile: 1577, internet: 641, motorcycle: 5384, phone: 600, computer: 2000
+            },
+            "มกราคม-2567": {
+                mother: 3000, mobile: 1627, internet: 641, motorcycle: 5384
+            },
+            "กุมภาพันธ์-2567": {
+                mother: 5000, mobile: 1318, secondPhone: 250, youtube: 59, motorcycle: 5384, internet: 641
+            },
+            "มีนาคม-2567": {
+                mother: 5000, mobile: 1318, youtube: 59, secondPhone: 250, motorcycle: 5384, internet: 641
+            },
+            "เมษายน-2567": {
+                mother: 5000, mobile: 1318, youtube: 59, secondPhone: 250, motorcycle: 5384, internet: 641
+            },
+            "พฤษภาคม-2567": {
+                mother: 5000, mobile: 1318, youtube: 59, secondPhone: 250, internet: 641, motorcycle: 5384
+            },
+            "มิถุนายน-2567": {
+                mother: 5000, mobile: 1318, youtube: 59, internet: 641, motorcycle: 5384, fan: 1000
+            },
+            "กรกฎาคม-2567": {
+                mother: 5000, fan: 1000, mobile: 1318, youtube: 59, internet: 641, motorcycle: 5384
+            },
+            "สิงหาคม-2567": {
+                mother: 5000, mobile: 1318, fan: 650, youtube: 59, internet: 641, motorcycle: 5384
+            },
+            "กันยายน-2567": {
+                mother: 5000, mobile: 1318, phoneInstallment: 1500, youtube: 59, internet: 641, motorcycle: 5384
+            },
+            "ตุลาคม-2567": {
+                mother: 5000, mobile: 1404, youtube: 118, phoneInstallment: 1500, internet: 641, motorcycle: 5384
+            },
+            "พฤศจิกายน-2567": {
+                mother: 5000, mobile: 1385, phoneInstallment: 1500, internet: 641, motorcycle: 5384, youtube: 118
+            },
+            "ธันวาคม-2567": {
+                mother: 5000, youtube: 118, phoneInstallment: 1500, internet: 641, motorcycle: 5384, mobile: 1385
+            },
+            "มกราคม-2568": {
+                mother: 5000, youtube: 118, mobile: 1385, car: 8600, internet: 641, phoneInstallment: 1500
+            },
+            "กุมภาพันธ์-2568": {
+                mother: 5000, car: 8600, youtube: 118, mobile: 1385, internet: 641, phoneInstallment: 1500, insurance: 1027
+            }
+        };
+
+        // Merge predefined data with stored data
+        expenseData = { ...predefinedData, ...expenseData };
+
+        function renderCategories() {
+            const container = document.getElementById('expenseCategories');
+            container.innerHTML = '';
+            
+            const categories = getAllCategories();
+            
+            Object.entries(categories).forEach(([key, category], index) => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'expense-input relative slide-in';
+                categoryDiv.style.animationDelay = `${index * 0.1}s`;
+                
+                const isCustom = customCategories[key] !== undefined;
+                const isDefault = defaultCategories[key] !== undefined;
+                
+                categoryDiv.innerHTML = `
+                    <div class="category-card rounded-2xl p-4 md:p-6 shadow-lg border-2 border-blue-100 hover:border-blue-300 transition-all duration-300 transform hover:scale-105">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+                            <label class="block text-base md:text-lg font-kanit font-semibold text-gray-800 flex items-center gap-2 flex-wrap">
+                                <span>${category.label}</span>
+                                ${isDefault ? '<span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full whitespace-nowrap">เริ่มต้น</span>' : ''}
+                                ${isCustom ? '<span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full whitespace-nowrap">กำหนดเอง</span>' : ''}
+                            </label>
+                            <div class="flex gap-2 flex-wrap">
+                                ${isCustom ? `
+                                    <button onclick="editCategory('${key}')" class="text-blue-500 hover:text-blue-700 text-xs md:text-sm font-medium bg-blue-50 px-2 md:px-3 py-1 rounded-lg transition-all duration-200 hover:bg-blue-100 whitespace-nowrap">
+                                        ✏️ แก้ไข
+                                    </button>
+                                    <button onclick="removeCategory('${key}')" class="text-red-500 hover:text-red-700 text-xs md:text-sm font-medium bg-red-50 px-2 md:px-3 py-1 rounded-lg transition-all duration-200 hover:bg-red-100 whitespace-nowrap">
+                                        🗑️ ลบ
+                                    </button>
+                                ` : ''}
+                                ${isDefault ? `
+                                    <button onclick="removeCategory('${key}')" class="text-red-500 hover:text-red-700 text-xs md:text-sm font-medium bg-red-50 px-2 md:px-3 py-1 rounded-lg transition-all duration-200 hover:bg-red-100 whitespace-nowrap">
+                                        🗑️ ลบ
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <input type="number" id="${key}" class="w-full border-2 border-gray-200 rounded-xl px-4 md:px-6 py-3 md:py-4 focus:ring-4 focus:ring-blue-300 focus:border-blue-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-blue-50 font-medium text-base md:text-lg shadow-inner" placeholder="0 บาท (ไม่บังคับ)">
+                    </div>
+                `;
+                
+                container.appendChild(categoryDiv);
+            });
+            
+            // Add event listeners for calculation
+            container.querySelectorAll('input[type="number"]').forEach(input => {
+                input.addEventListener('input', calculateTotal);
+            });
+        }
+
+        function addNewCategory() {
+            const nameInput = document.getElementById('newCategoryName');
+            const iconInput = document.getElementById('newCategoryIcon');
+            
+            const name = nameInput.value.trim();
+            const icon = iconInput.value.trim() || '📝';
+            
+            if (!name) {
+                showNotification('กรุณาใส่ชื่อหมวดหมู่', 'error');
+                return;
+            }
+            
+            // Generate unique key
+            const key = 'custom_' + Date.now();
+            
+            // Add to custom categories
+            customCategories[key] = {
+                label: `${icon} ${name}`,
+                icon: icon
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('customCategories', JSON.stringify(customCategories));
+            
+            // Clear inputs
+            nameInput.value = '';
+            iconInput.value = '';
+            
+            // Re-render categories
+            renderCategories();
+            
+            showNotification('เพิ่มหมวดหมู่สำเร็จ!', 'success');
+        }
+        
+        function editCategory(key) {
+            const category = customCategories[key];
+            if (!category) return;
+            
+            const newName = prompt('แก้ไขชื่อหมวดหมู่:', category.label.replace(/^.+?\s/, ''));
+            const newIcon = prompt('แก้ไขไอคอน:', category.icon);
+            
+            if (newName && newIcon) {
+                customCategories[key] = {
+                    label: `${newIcon} ${newName}`,
+                    icon: newIcon
+                };
+                
+                localStorage.setItem('customCategories', JSON.stringify(customCategories));
+                renderCategories();
+                loadExpenseData();
+                showNotification('แก้ไขหมวดหมู่สำเร็จ!', 'success');
+            }
+        }
+        
+        function clearAllInputs() {
+            if (confirm('คุณต้องการล้างข้อมูลทั้งหมดหรือไม่?')) {
+                document.querySelectorAll('#expenseCategories input[type="number"]').forEach(input => {
+                    input.value = '';
+                });
+                calculateTotal();
+                showNotification('ล้างข้อมูลแล้ว', 'info');
+            }
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-xl shadow-2xl transform transition-all duration-500 translate-x-full`;
+            
+            const colors = {
+                success: 'bg-gradient-to-r from-green-500 to-emerald-600 text-white',
+                error: 'bg-gradient-to-r from-red-500 to-pink-600 text-white',
+                info: 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white'
+            };
+            
+            notification.className += ` ${colors[type]}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 500);
+            }, 3000);
+        }
+        
+        function exportToExcel() {
+            const categories = getAllCategories();
+            const workbook = XLSX.utils.book_new();
+            
+            // Monthly Summary Sheet
+            const monthlyData = [];
+            monthlyData.push(['เดือน-ปี', 'รายการ', 'จำนวนเงิน (บาท)']);
+            
+            Object.entries(expenseData).forEach(([key, data]) => {
+                const [month, year] = key.split('-');
+                Object.entries(data).forEach(([category, amount]) => {
+                    const categoryInfo = categories[category];
+                    const label = categoryInfo ? categoryInfo.label : category;
+                    monthlyData.push([`${month} พ.ศ. ${year}`, label, amount]);
+                });
+            });
+            
+            const monthlySheet = XLSX.utils.aoa_to_sheet(monthlyData);
+            XLSX.utils.book_append_sheet(workbook, monthlySheet, 'รายเดือน');
+            
+            // Yearly Summary Sheet
+            const yearlyData = [];
+            yearlyData.push(['ปี พ.ศ.', 'รายการ', 'จำนวนเงิน (บาท)']);
+            
+            const yearlyTotals = {};
+            Object.entries(expenseData).forEach(([key, data]) => {
+                const year = key.split('-')[1];
+                if (!yearlyTotals[year]) yearlyTotals[year] = {};
+                
+                Object.entries(data).forEach(([category, amount]) => {
+                    if (!yearlyTotals[year][category]) yearlyTotals[year][category] = 0;
+                    yearlyTotals[year][category] += amount;
+                });
+            });
+            
+            Object.entries(yearlyTotals).forEach(([year, data]) => {
+                Object.entries(data).forEach(([category, amount]) => {
+                    const categoryInfo = categories[category];
+                    const label = categoryInfo ? categoryInfo.label : category;
+                    yearlyData.push([`พ.ศ. ${year}`, label, amount]);
+                });
+            });
+            
+            const yearlySheet = XLSX.utils.aoa_to_sheet(yearlyData);
+            XLSX.utils.book_append_sheet(workbook, yearlySheet, 'รายปี');
+            
+            // Category Summary Sheet
+            const categoryData = [];
+            categoryData.push(['หมวดหมู่', 'ประเภท', 'ยอดรวมทั้งหมด (บาท)']);
+            
+            const categoryTotals = {};
+            Object.values(expenseData).forEach(data => {
+                Object.entries(data).forEach(([category, amount]) => {
+                    if (!categoryTotals[category]) categoryTotals[category] = 0;
+                    categoryTotals[category] += amount;
+                });
+            });
+            
+            Object.entries(categoryTotals).forEach(([category, total]) => {
+                const categoryInfo = categories[category];
+                const label = categoryInfo ? categoryInfo.label : category;
+                const type = customCategories[category] ? 'กำหนดเอง' : 'เริ่มต้น';
+                categoryData.push([label, type, total]);
+            });
+            
+            const categorySheet = XLSX.utils.aoa_to_sheet(categoryData);
+            XLSX.utils.book_append_sheet(workbook, categorySheet, 'สรุปตามหมวดหมู่');
+            
+            // Generate filename with current date
+            const now = new Date();
+            const filename = `ค่าใช้จ่าย_${now.getDate()}-${now.getMonth()+1}-${now.getFullYear()+543}.xlsx`;
+            
+            XLSX.writeFile(workbook, filename);
+            showNotification('ส่งออกไฟล์ Excel สำเร็จ!', 'success');
+        }
+
+        function removeCategory(key) {
+            const category = getAllCategories()[key];
+            const categoryName = category ? category.label : key;
+            
+            if (confirm(`คุณต้องการลบหมวดหมู่ "${categoryName}" หรือไม่?\n\nข้อมูลทั้งหมดในหมวดหมู่นี้จะถูกลบด้วย`)) {
+                // Remove from custom categories if it's custom
+                if (customCategories[key]) {
+                    delete customCategories[key];
+                    localStorage.setItem('customCategories', JSON.stringify(customCategories));
+                }
+                
+                // Remove from default categories by adding to hidden list
+                if (defaultCategories[key]) {
+                    let hiddenCategories = JSON.parse(localStorage.getItem('hiddenCategories')) || [];
+                    if (!hiddenCategories.includes(key)) {
+                        hiddenCategories.push(key);
+                        localStorage.setItem('hiddenCategories', JSON.stringify(hiddenCategories));
+                    }
+                }
+                
+                // Remove from all expense data
+                Object.keys(expenseData).forEach(monthKey => {
+                    if (expenseData[monthKey][key]) {
+                        delete expenseData[monthKey][key];
+                    }
+                });
+                localStorage.setItem('expenseData', JSON.stringify(expenseData));
+                
+                renderCategories();
+                loadExpenseData();
+                showNotification('ลบหมวดหมู่สำเร็จ!', 'success');
+            }
+        }
+
+        function calculateTotal() {
+            const inputs = document.querySelectorAll('#expenseCategories input[type="number"]');
+            let total = 0;
+            inputs.forEach(input => {
+                total += parseFloat(input.value) || 0;
+            });
+            document.getElementById('totalAmount').textContent = total.toLocaleString();
+        }
+
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                if (!btn.onclick.toString().includes('exportToExcel')) {
+                    btn.classList.remove('bg-gradient-to-r', 'from-blue-500', 'to-purple-600', 'glow');
+                    btn.classList.add('bg-white/30', 'hover:bg-white/40');
+                }
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + 'Content').classList.remove('hidden');
+            
+            // Add active class to selected tab
+            const activeTab = document.getElementById(tabName + 'Tab');
+            if (activeTab) {
+                activeTab.classList.remove('bg-white/30', 'hover:bg-white/40');
+                activeTab.classList.add('bg-gradient-to-r', 'from-blue-500', 'to-purple-600', 'glow');
+            }
+            
+            // Update summaries when switching to summary tabs
+            if (tabName === 'monthly') {
+                updateMonthlySummary();
+            } else if (tabName === 'yearly') {
+                updateYearlySummary();
+            }
+        }
+
+        function saveExpense() {
+            const month = document.getElementById('monthSelect').value;
+            const year = document.getElementById('yearSelect').value;
+            const key = `${month}-${year}`;
+            
+            const expense = {};
+            const inputs = document.querySelectorAll('#expenseCategories input[type="number"]');
+            
+            inputs.forEach(input => {
+                const value = parseFloat(input.value) || 0;
+                if (value > 0) {
+                    expense[input.id] = value;
+                }
+            });
+            
+            expenseData[key] = expense;
+            localStorage.setItem('expenseData', JSON.stringify(expenseData));
+            
+            // Show success message
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = '✅ บันทึกแล้ว!';
+            button.classList.remove('bg-green-500', 'hover:bg-green-600');
+            button.classList.add('bg-green-600');
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.classList.remove('bg-green-600');
+                button.classList.add('bg-green-500', 'hover:bg-green-600');
+            }, 2000);
+        }
+
+        function loadExpenseData() {
+            const month = document.getElementById('monthSelect').value;
+            const year = document.getElementById('yearSelect').value;
+            const key = `${month}-${year}`;
+            
+            // Clear all inputs first
+            document.querySelectorAll('#expenseCategories input[type="number"]').forEach(input => {
+                input.value = '';
+            });
+            
+            // Load data if exists
+            if (expenseData[key]) {
+                const data = expenseData[key];
+                Object.keys(data).forEach(category => {
+                    const input = document.getElementById(category);
+                    if (input) {
+                        input.value = data[category];
+                    }
+                });
+            }
+            
+            calculateTotal();
+        }
+
+        function updateMonthlySummary() {
+            const container = document.getElementById('monthlySummary');
+            container.innerHTML = '';
+            
+            const categories = getAllCategories();
+            
+            // Sort months chronologically (newest first)
+            const sortedEntries = Object.entries(expenseData).sort((a, b) => {
+                const [monthA, yearA] = a[0].split('-');
+                const [monthB, yearB] = b[0].split('-');
+                
+                if (yearA !== yearB) return parseInt(yearB) - parseInt(yearA);
+                
+                const months = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 
+                              'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+                return months.indexOf(monthB) - months.indexOf(monthA);
+            });
+            
+            sortedEntries.forEach(([key, data], index) => {
+                const total = Object.values(data).reduce((sum, val) => sum + val, 0);
+                
+                const monthCard = document.createElement('div');
+                monthCard.className = 'bg-gradient-to-br from-white to-blue-50 rounded-2xl p-4 md:p-8 border-2 border-blue-200 shadow-xl card-hover slide-in';
+                monthCard.style.animationDelay = `${index * 0.1}s`;
+                
+                let expenseDetails = '';
+                const sortedExpenses = Object.entries(data).sort((a, b) => b[1] - a[1]);
+                
+                sortedExpenses.forEach(([category, amount], idx) => {
+                    const categoryInfo = categories[category];
+                    const label = categoryInfo ? categoryInfo.label : category;
+                    const percentage = ((amount / total) * 100).toFixed(1);
+                    
+                    expenseDetails += `
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 px-4 rounded-xl bg-gradient-to-r from-gray-50 to-blue-50 mb-2 border border-blue-100 gap-2">
+                            <div class="flex items-center gap-3 flex-wrap">
+                                <div class="w-3 h-3 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex-shrink-0"></div>
+                                <span class="text-gray-800 font-medium text-sm md:text-base">${label}</span>
+                                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">${percentage}%</span>
+                            </div>
+                            <span class="font-kanit font-bold text-gray-900 text-base md:text-lg">${amount.toLocaleString()} บาท</span>
+                        </div>
+                    `;
+                });
+                
+                const [month, year] = key.split('-');
+                monthCard.innerHTML = `
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+                        <div class="text-center sm:text-left">
+                            <h3 class="text-xl md:text-2xl font-kanit font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                ${month} พ.ศ. ${year}
+                            </h3>
+                            <p class="text-gray-600 text-sm mt-1">${Object.keys(data).length} รายการ</p>
+                        </div>
+                        <div class="text-center sm:text-right">
+                            <div class="text-2xl md:text-3xl font-kanit font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                ${total.toLocaleString()}
+                            </div>
+                            <div class="text-gray-600 text-sm">บาท</div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        ${expenseDetails}
+                    </div>
+                `;
+                
+                container.appendChild(monthCard);
+            });
+            
+            if (sortedEntries.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="text-6xl mb-4">📊</div>
+                        <h3 class="text-xl font-semibold text-gray-600 mb-2">ยังไม่มีข้อมูล</h3>
+                        <p class="text-gray-500">เริ่มบันทึกค่าใช้จ่ายของคุณได้เลย</p>
+                    </div>
+                `;
+            }
+        }
+
+        function updateYearlySummary() {
+            const container = document.getElementById('yearlySummary');
+            container.innerHTML = '';
+            
+            const categories = getAllCategories();
+            
+            // Group by year
+            const yearlyData = {};
+            Object.entries(expenseData).forEach(([key, data]) => {
+                const year = key.split('-')[1];
+                if (!yearlyData[year]) {
+                    yearlyData[year] = {};
+                }
+                
+                Object.entries(data).forEach(([category, amount]) => {
+                    if (!yearlyData[year][category]) {
+                        yearlyData[year][category] = 0;
+                    }
+                    yearlyData[year][category] += amount;
+                });
+            });
+            
+            // Sort years (newest first)
+            const sortedYears = Object.keys(yearlyData).sort((a, b) => parseInt(b) - parseInt(a));
+            
+            sortedYears.forEach((year, index) => {
+                const data = yearlyData[year];
+                const total = Object.values(data).reduce((sum, val) => sum + val, 0);
+                const monthCount = Object.keys(expenseData).filter(key => key.endsWith(`-${year}`)).length;
+                const avgPerMonth = monthCount > 0 ? total / monthCount : 0;
+                
+                const yearCard = document.createElement('div');
+                yearCard.className = 'bg-gradient-to-br from-white to-emerald-50 rounded-2xl p-4 md:p-8 border-2 border-emerald-200 shadow-2xl card-hover bounce-in';
+                yearCard.style.animationDelay = `${index * 0.2}s`;
+                
+                let categoryDetails = '';
+                const sortedCategories = Object.entries(data).sort((a, b) => b[1] - a[1]);
+                
+                sortedCategories.forEach(([category, amount]) => {
+                    const categoryInfo = categories[category];
+                    const label = categoryInfo ? categoryInfo.label : category;
+                    const percentage = ((amount / total) * 100).toFixed(1);
+                    
+                    categoryDetails += `
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-4 px-4 md:px-6 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 mb-3 border border-emerald-200 shadow-sm gap-3">
+                            <div class="flex items-center gap-3 md:gap-4">
+                                <div class="w-4 h-4 rounded-full bg-gradient-to-r from-emerald-400 to-teal-500 flex-shrink-0"></div>
+                                <div>
+                                    <span class="text-gray-800 font-kanit font-semibold text-base md:text-lg">${label}</span>
+                                    <div class="text-sm text-gray-600">${percentage}% ของยอดรวม</div>
+                                </div>
+                            </div>
+                            <div class="text-center sm:text-right">
+                                <span class="font-kanit font-bold text-gray-900 text-lg md:text-xl">${amount.toLocaleString()}</span>
+                                <div class="text-sm text-gray-600">บาท</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                yearCard.innerHTML = `
+                    <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start mb-6 md:mb-8 gap-4">
+                        <div class="text-center lg:text-left">
+                            <h3 class="text-2xl md:text-3xl font-kanit font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2">
+                                ปี พ.ศ. ${year}
+                            </h3>
+                            <div class="flex flex-wrap justify-center lg:justify-start gap-2 md:gap-4 text-xs md:text-sm text-gray-600">
+                                <span class="bg-emerald-100 px-2 py-1 rounded-full">📅 ${monthCount} เดือน</span>
+                                <span class="bg-emerald-100 px-2 py-1 rounded-full">📊 ${Object.keys(data).length} หมวดหมู่</span>
+                                <span class="bg-emerald-100 px-2 py-1 rounded-full">💰 เฉลี่ย ${avgPerMonth.toLocaleString()} บาท/เดือน</span>
+                            </div>
+                        </div>
+                        <div class="text-center lg:text-right">
+                            <div class="text-3xl md:text-4xl font-kanit font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                                ${total.toLocaleString()}
+                            </div>
+                            <div class="text-gray-600 text-sm">บาท</div>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        ${categoryDetails}
+                    </div>
+                `;
+                
+                container.appendChild(yearCard);
+            });
+            
+            if (sortedYears.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="text-6xl mb-4">📈</div>
+                        <h3 class="text-xl font-semibold text-gray-600 mb-2">ยังไม่มีข้อมูล</h3>
+                        <p class="text-gray-500">เริ่มบันทึกค่าใช้จ่ายของคุณได้เลย</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Event listeners
+        document.getElementById('monthSelect').addEventListener('change', loadExpenseData);
+        document.getElementById('yearSelect').addEventListener('change', loadExpenseData);
+
+        // Initialize
+        generateYears();
+        setCurrentMonth();
+        renderCategories();
+        loadExpenseData();
+        calculateTotal();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96f59712268545c0',t:'MTc1NTIyODM4My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
