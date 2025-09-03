@@ -329,60 +329,7 @@
             return { ...filteredDefaults, ...customCategories };
         }
 
-        // Predefined data from your input
-        const predefinedData = {
-            "ตุลาคม-2566": {
-                mother: 5000, mobile: 1517, internet: 984, motorcycle: 5384, phone: 600, computer: 2000
-            },
-            "พฤศจิกายน-2566": {
-                mother: 5000, mobile: 1483, internet: 641, motorcycle: 5384, phone: 600, computer: 2000
-            },
-            "ธันวาคม-2566": {
-                mother: 1000, mobile: 1577, internet: 641, motorcycle: 5384, phone: 600, computer: 2000
-            },
-            "มกราคม-2567": {
-                mother: 3000, mobile: 1627, internet: 641, motorcycle: 5384
-            },
-            "กุมภาพันธ์-2567": {
-                mother: 5000, mobile: 1318, secondPhone: 250, youtube: 59, motorcycle: 5384, internet: 641
-            },
-            "มีนาคม-2567": {
-                mother: 5000, mobile: 1318, youtube: 59, secondPhone: 250, motorcycle: 5384, internet: 641
-            },
-            "เมษายน-2567": {
-                mother: 5000, mobile: 1318, youtube: 59, secondPhone: 250, motorcycle: 5384, internet: 641
-            },
-            "พฤษภาคม-2567": {
-                mother: 5000, mobile: 1318, youtube: 59, secondPhone: 250, internet: 641, motorcycle: 5384
-            },
-            "มิถุนายน-2567": {
-                mother: 5000, mobile: 1318, youtube: 59, internet: 641, motorcycle: 5384, fan: 1000
-            },
-            "กรกฎาคม-2567": {
-                mother: 5000, fan: 1000, mobile: 1318, youtube: 59, internet: 641, motorcycle: 5384
-            },
-            "สิงหาคม-2567": {
-                mother: 5000, mobile: 1318, fan: 650, youtube: 59, internet: 641, motorcycle: 5384
-            },
-            "กันยายน-2567": {
-                mother: 5000, mobile: 1318, phoneInstallment: 1500, youtube: 59, internet: 641, motorcycle: 5384
-            },
-            "ตุลาคม-2567": {
-                mother: 5000, mobile: 1404, youtube: 118, phoneInstallment: 1500, internet: 641, motorcycle: 5384
-            },
-            "พฤศจิกายน-2567": {
-                mother: 5000, mobile: 1385, phoneInstallment: 1500, internet: 641, motorcycle: 5384, youtube: 118
-            },
-            "ธันวาคม-2567": {
-                mother: 5000, youtube: 118, phoneInstallment: 1500, internet: 641, motorcycle: 5384, mobile: 1385
-            },
-            "มกราคม-2568": {
-                mother: 5000, youtube: 118, mobile: 1385, car: 8600, internet: 641, phoneInstallment: 1500
-            },
-            "กุมภาพันธ์-2568": {
-                mother: 5000, car: 8600, youtube: 118, mobile: 1385, internet: 641, phoneInstallment: 1500, insurance: 1027
-            }
-        };
+        
 
         // Merge predefined data with stored data
         expenseData = { ...predefinedData, ...expenseData };
