@@ -1,618 +1,137 @@
 <!DOCTYPE html>
-<html lang="th">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ร้านขายของเล็กๆ — Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700;800;900&family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
-<style>
-:root {
-  --lime: #d4ff00;
-  --cyan: #00f5ff;
-  --pink: #ff2d78;
-  --orange: #ff6b00;
-  --purple: #b44dff;
-  --green: #00e676;
-  --bg: #080c10;
-  --surface: #0e1420;
-  --card: #111827;
-  --border: #1e2d40;
-  --text: #f0f4ff;
-  --muted: #4a6080;
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Kanit', sans-serif;
-  font-weight: 400;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* Animated background grid */
-body::before {
-  content: '';
-  position: fixed; inset: 0; z-index: 0;
-  background-image:
-    linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events: none;
-}
-
-/* Glowing orbs */
-.orb {
-  position: fixed; border-radius: 50%;
-  filter: blur(80px); pointer-events: none; z-index: 0;
-  animation: orbFloat 8s ease-in-out infinite;
-}
-.orb1 { width:400px; height:400px; background:rgba(212,255,0,0.06); top:-100px; left:-100px; animation-delay:0s; }
-.orb2 { width:300px; height:300px; background:rgba(0,245,255,0.07); bottom:-50px; right:-50px; animation-delay:-3s; }
-.orb3 { width:200px; height:200px; background:rgba(255,45,120,0.05); top:50%; left:50%; animation-delay:-5s; }
-
-@keyframes orbFloat {
-  0%,100% { transform: translate(0,0) scale(1); }
-  33% { transform: translate(30px,-20px) scale(1.05); }
-  66% { transform: translate(-20px,15px) scale(0.95); }
-}
-
-/* Layout */
-.wrapper { position: relative; z-index: 1; padding: 16px; max-width: 480px; margin: 0 auto; }
-
-/* Header */
-.header {
-  margin-bottom: 20px;
-  padding: 20px;
-  background: linear-gradient(135deg, rgba(212,255,0,0.08), rgba(0,245,255,0.05));
-  border: 1px solid rgba(212,255,0,0.2);
-  border-radius: 20px;
-  position: relative;
-  overflow: hidden;
-  animation: slideDown 0.5s ease;
-}
-.header::after {
-  content: '🛒';
-  position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
-  font-size: 48px; opacity: 0.15;
-}
-.header-sub { font-size: 11px; font-weight: 300; color: var(--lime); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 4px; }
-.header h1 { font-size: 22px; font-weight: 800; color: #fff; line-height: 1.2; }
-.header-time { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); margin-top: 6px; }
-.live-dot {
-  display: inline-block; width: 6px; height: 6px;
-  background: var(--lime); border-radius: 50%; margin-right: 6px;
-  animation: pulse 1.5s ease-in-out infinite;
-}
-@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
-
-/* Big stat row */
-.big-row {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 12px; margin-bottom: 12px;
-}
-.big-card {
-  background: var(--card);
-  border-radius: 18px;
-  padding: 18px 16px;
-  border: 1px solid var(--border);
-  position: relative; overflow: hidden;
-  animation: fadeUp 0.5s ease both;
-  cursor: pointer;
-  transition: transform 0.2s, border-color 0.2s;
-}
-.big-card:hover { transform: translateY(-3px); }
-.big-card::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  border-radius: 18px 18px 0 0;
-}
-.big-card.lime::before { background: linear-gradient(90deg, var(--lime), var(--cyan)); border-color: rgba(212,255,0,0.2); }
-.big-card.pink::before { background: linear-gradient(90deg, var(--pink), var(--purple)); }
-.big-card.cyan::before { background: linear-gradient(90deg, var(--cyan), var(--green)); }
-.big-card.orange::before { background: linear-gradient(90deg, var(--orange), var(--pink)); }
-
-.big-card:hover { border-color: rgba(255,255,255,0.1); }
-.big-card .label { font-size: 11px; font-weight: 300; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 6px; }
-.big-card .value {
-  font-size: 24px; font-weight: 800;
-  font-family: 'IBM Plex Mono', monospace;
-  line-height: 1;
-}
-.big-card.lime .value { color: var(--lime); }
-.big-card.pink .value { color: var(--pink); }
-.big-card.cyan .value { color: var(--cyan); }
-.big-card.orange .value { color: var(--orange); }
-.big-card .unit { font-size: 11px; font-weight: 300; opacity: 0.6; margin-left: 2px; }
-.big-card .sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
-.big-card .trend {
-  position: absolute; top: 14px; right: 14px;
-  font-size: 11px; font-weight: 600; padding: 2px 8px;
-  border-radius: 20px;
-}
-.trend-up { background: rgba(0,230,118,0.15); color: var(--green); }
-.trend-dn { background: rgba(255,45,120,0.15); color: var(--pink); }
-
-/* Full-width card */
-.full-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  margin-bottom: 12px;
-  overflow: hidden;
-  animation: fadeUp 0.5s ease both;
-}
-.full-card-header {
-  padding: 14px 18px 0;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.full-card-title { font-size: 13px; font-weight: 700; color: var(--text); }
-.full-card-badge {
-  font-size: 10px; font-weight: 600; padding: 3px 10px;
-  border-radius: 20px; letter-spacing: 0.5px;
-}
-.badge-lime { background: rgba(212,255,0,0.12); color: var(--lime); border: 1px solid rgba(212,255,0,0.2); }
-.badge-cyan { background: rgba(0,245,255,0.12); color: var(--cyan); border: 1px solid rgba(0,245,255,0.2); }
-.badge-pink { background: rgba(255,45,120,0.12); color: var(--pink); border: 1px solid rgba(255,45,120,0.2); }
-.badge-orange { background: rgba(255,107,0,0.12); color: var(--orange); border: 1px solid rgba(255,107,0,0.2); }
-
-/* Bar chart */
-.chart-area { padding: 16px 18px 18px; }
-.chart-bars {
-  display: flex; align-items: flex-end;
-  gap: 6px; height: 100px;
-}
-.bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.bars { display: flex; gap: 2px; align-items: flex-end; width: 100%; }
-.bar {
-  flex: 1; border-radius: 4px 4px 0 0;
-  transition: height 0.8s cubic-bezier(.34,1.56,.64,1);
-  min-height: 2px;
-}
-.bar-income { background: linear-gradient(180deg, var(--lime), rgba(212,255,0,0.4)); }
-.bar-expense { background: linear-gradient(180deg, var(--pink), rgba(255,45,120,0.4)); }
-.bar-label { font-size: 9px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
-.chart-legend {
-  display: flex; gap: 16px; margin-top: 12px;
-}
-.legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
-.legend-dot { width: 8px; height: 8px; border-radius: 2px; }
-
-/* Product list */
-.prod-list { padding: 0 0 4px; }
-.prod-item {
-  display: flex; align-items: center;
-  padding: 12px 18px;
-  border-bottom: 1px solid rgba(30,45,64,0.5);
-  transition: background 0.15s;
-}
-.prod-item:last-child { border-bottom: none; }
-.prod-item:hover { background: rgba(255,255,255,0.02); }
-.prod-rank {
-  width: 24px; height: 24px; border-radius: 6px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 800; margin-right: 12px; flex-shrink: 0;
-}
-.rank-1 { background: linear-gradient(135deg,#ffd700,#ff8c00); color: #000; }
-.rank-2 { background: linear-gradient(135deg,#c0c0c0,#808080); color: #000; }
-.rank-3 { background: linear-gradient(135deg,#cd7f32,#8b4513); color: #fff; }
-.rank-n { background: rgba(255,255,255,0.05); color: var(--muted); }
-.prod-info { flex: 1; min-width: 0; }
-.prod-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.prod-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
-.prod-bar-wrap { width: 80px; margin: 0 12px; }
-.prod-bar-bg { height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
-.prod-bar-fill { height: 100%; border-radius: 2px; transition: width 1s cubic-bezier(.34,1.56,.64,1); }
-.prod-val { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 700; text-align: right; }
-
-/* Stock alert */
-.alert-item {
-  display: flex; align-items: center;
-  padding: 10px 18px;
-  border-bottom: 1px solid rgba(30,45,64,0.5);
-}
-.alert-item:last-child { border-bottom: none; }
-.alert-icon { font-size: 18px; margin-right: 12px; }
-.alert-info { flex: 1; }
-.alert-name { font-size: 13px; font-weight: 600; }
-.alert-sub { font-size: 11px; color: var(--muted); }
-.stock-pill {
-  font-size: 11px; font-weight: 700; padding: 4px 10px;
-  border-radius: 20px; font-family: 'IBM Plex Mono', monospace;
-}
-.stock-danger { background: rgba(255,45,120,0.15); color: var(--pink); border: 1px solid rgba(255,45,120,0.3); }
-.stock-warn { background: rgba(255,107,0,0.15); color: var(--orange); border: 1px solid rgba(255,107,0,0.3); }
-.stock-ok { background: rgba(0,230,118,0.15); color: var(--green); border: 1px solid rgba(0,230,118,0.3); }
-
-/* Stat row 3 */
-.stat-row {
-  display: grid; grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px; margin-bottom: 12px;
-}
-.mini-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 14px 12px;
-  text-align: center;
-  animation: fadeUp 0.5s ease both;
-}
-.mini-icon { font-size: 22px; margin-bottom: 6px; }
-.mini-val { font-size: 18px; font-weight: 800; font-family: 'IBM Plex Mono', monospace; }
-.mini-label { font-size: 10px; color: var(--muted); margin-top: 3px; }
-
-/* Profit meter */
-.meter-wrap { padding: 16px 18px 18px; }
-.meter-label-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; }
-.meter-track { height: 10px; background: rgba(255,255,255,0.06); border-radius: 20px; overflow: hidden; }
-.meter-fill {
-  height: 100%; border-radius: 20px;
-  background: linear-gradient(90deg, var(--lime), var(--cyan));
-  transition: width 1.2s cubic-bezier(.34,1.56,.64,1);
-  position: relative;
-}
-.meter-fill::after {
-  content: '';
-  position: absolute; right: 0; top: 0; bottom: 0; width: 20px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
-  animation: shimmer 1.5s ease-in-out infinite;
-}
-@keyframes shimmer { 0%,100%{opacity:0} 50%{opacity:1} }
-.margin-pct { font-size: 28px; font-weight: 900; color: var(--lime); font-family: 'IBM Plex Mono', monospace; }
-
-/* Animations */
-@keyframes slideDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:translateY(0)} }
-@keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-.d1{animation-delay:0.05s} .d2{animation-delay:0.1s} .d3{animation-delay:0.15s}
-.d4{animation-delay:0.2s} .d5{animation-delay:0.25s} .d6{animation-delay:0.3s}
-
-/* Refresh btn */
-.refresh-btn {
-  width: 100%; margin-bottom: 12px;
-  background: linear-gradient(135deg, rgba(212,255,0,0.1), rgba(0,245,255,0.08));
-  border: 1px solid rgba(212,255,0,0.25);
-  color: var(--lime);
-  font-family: 'Kanit', sans-serif;
-  font-size: 13px; font-weight: 600;
-  padding: 14px;
-  border-radius: 14px;
-  cursor: pointer;
-  letter-spacing: 0.5px;
-  transition: all 0.2s;
-  animation: fadeUp 0.5s ease both;
-}
-.refresh-btn:hover { background: rgba(212,255,0,0.15); transform: scale(1.01); }
-.refresh-btn:active { transform: scale(0.98); }
-
-.pb { padding-bottom: 20px; }
-</style>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบลงสต๊อกสินค้าครั้งแรกด้วย QR Code</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    /* ปรับแต่งปุ่มสลับกล้องของไลบรารีให้ดูง่ายขึ้น */
+    #reader button {
+      background-color: #4b5563; color: white; padding: 6px 12px; border-radius: 6px; margin: 5px; font-size: 14px;
+    }
+  </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 p-4 font-sans">
 
-<div class="orb orb1"></div>
-<div class="orb orb2"></div>
-<div class="orb orb3"></div>
+  <div class="max-w-md mx-auto bg-white p-6 rounded-2xl shadow-xl border border-slate-100 mt-2">
+    <div class="text-center mb-5">
+      <h2 class="text-2xl font-black text-blue-600">📦 ลงสต๊อกสินค้าครั้งแรก</h2>
+      <p class="text-sm text-slate-500 mt-1">สแกน QR Code หรือบาร์โค้ด เพื่อบันทึกชื่อและราคาสินค้า</p>
+    </div>
+    
+    <div class="mb-5">
+      <div id="reader" class="w-full rounded-xl overflow-hidden border border-slate-300 bg-slate-900 shadow-inner"></div>
+      <p id="scan-status" class="text-xs text-center mt-2 text-slate-500 font-medium">📷 กำลังเปิดกล้องสแกน...</p>
+    </div>
 
-<div class="wrapper pb">
-
-  <!-- Header -->
-  <div class="header">
-    <div class="header-sub">ระบบจัดการร้าน</div>
-    <h1>ร้านขายของเล็กๆ</h1>
-    <div class="header-time">
-      <span class="live-dot"></span>
-      <span id="clock">--/--/---- --:--:--</span>
-    </div>
-  </div>
-
-  <!-- Big stats -->
-  <div class="big-row">
-    <div class="big-card lime d1">
-      <div class="label">ยอดขายวันนี้</div>
-      <div class="value" id="today-sales">฿<span>0</span></div>
-      <div class="sub" id="today-count">0 รายการ</div>
-      <div class="trend trend-up" id="today-trend">+0%</div>
-    </div>
-    <div class="big-card pink d2">
-      <div class="label">กำไรวันนี้</div>
-      <div class="value" id="today-profit">฿<span>0</span></div>
-      <div class="sub" id="profit-margin">margin 0%</div>
-    </div>
-  </div>
-
-  <div class="big-row">
-    <div class="big-card cyan d3">
-      <div class="label">ยอดขายเดือนนี้</div>
-      <div class="value" id="month-sales">฿<span>0</span></div>
-      <div class="sub" id="month-days">เดือนนี้</div>
-    </div>
-    <div class="big-card orange d4">
-      <div class="label">กำไรสุทธิเดือน</div>
-      <div class="value" id="month-profit">฿<span>0</span></div>
-      <div class="sub" id="expense-sub">หักค่าใช้จ่าย</div>
-    </div>
-  </div>
-
-  <!-- Mini stats -->
-  <div class="stat-row">
-    <div class="mini-card d1">
-      <div class="mini-icon">📦</div>
-      <div class="mini-val" id="total-products" style="color:var(--cyan)">0</div>
-      <div class="mini-label">รายการสินค้า</div>
-    </div>
-    <div class="mini-card d2">
-      <div class="mini-icon">⚠️</div>
-      <div class="mini-val" id="low-stock-count" style="color:var(--pink)">0</div>
-      <div class="mini-label">ใกล้หมด</div>
-    </div>
-    <div class="mini-card d3">
-      <div class="mini-icon">💼</div>
-      <div class="mini-val" id="stock-value" style="color:var(--lime)">฿0</div>
-      <div class="mini-label">มูลค่าสต๊อก</div>
-    </div>
-  </div>
-
-  <!-- Profit meter -->
-  <div class="full-card d4">
-    <div class="full-card-header">
-      <div class="full-card-title">Profit Margin เดือนนี้</div>
-      <div class="full-card-badge badge-lime">LIVE</div>
-    </div>
-    <div class="meter-wrap">
-      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:12px">
-        <div class="margin-pct" id="margin-pct">0%</div>
-        <div style="font-size:12px;color:var(--muted)" id="margin-sub">จากยอดขายทั้งหมด</div>
+    <form id="productForm" onsubmit="submitForm(event)">
+      
+      <div class="mb-3">
+        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">รหัสบาร์โค้ด / QR Code</label>
+        <input type="text" id="barcode" class="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-lg font-mono font-bold text-blue-700 shadow-sm" readonly required placeholder="[ นำกล้องไปส่องสแกนรหัส ]">
       </div>
-      <div class="meter-label-row">
-        <span style="color:var(--muted);font-size:11px">0%</span>
-        <span style="color:var(--muted);font-size:11px">50%</span>
-        <span style="color:var(--muted);font-size:11px">100%</span>
+
+      <div class="mb-3">
+        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">ชื่อสินค้า (ชื่อขนม)</label>
+        <input type="text" id="productName" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required placeholder="เช่น ขนมปังเนยสด, เทสโต">
       </div>
-      <div class="meter-track">
-        <div class="meter-fill" id="meter-fill" style="width:0%"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-top:12px">
-        <div style="text-align:center">
-          <div style="font-size:12px;color:var(--muted)">รายรับ</div>
-          <div style="font-size:14px;font-weight:700;color:var(--lime);font-family:'IBM Plex Mono',monospace" id="total-income">฿0</div>
+
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">ราคาต้นทุน (บาท)</label>
+          <input type="number" id="productCost" step="0.01" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required placeholder="0.00">
         </div>
-        <div style="text-align:center">
-          <div style="font-size:12px;color:var(--muted)">รายจ่าย</div>
-          <div style="font-size:14px;font-weight:700;color:var(--pink);font-family:'IBM Plex Mono',monospace" id="total-expense">฿0</div>
-        </div>
-        <div style="text-align:center">
-          <div style="font-size:12px;color:var(--muted)">กำไรสุทธิ</div>
-          <div style="font-size:14px;font-weight:700;color:var(--cyan);font-family:'IBM Plex Mono',monospace" id="net-profit">฿0</div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">ราคาขาย (บาท)</label>
+          <input type="number" id="productPrice" step="0.01" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required placeholder="0.00">
         </div>
       </div>
-    </div>
+
+      <div class="mb-5">
+        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">จำนวนสต๊อกเริ่มต้น (ชิ้น/ห่อ)</label>
+        <input type="number" id="productStock" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required placeholder="เช่น 10, 20, 50">
+      </div>
+
+      <button type="submit" id="btnSubmit" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-xl shadow-lg shadow-blue-200 transition duration-200 cursor-pointer">
+        💾 เพิ่มสินค้าเข้าคลัง
+      </button>
+    </form>
   </div>
 
-  <!-- Sales chart -->
-  <div class="full-card d5">
-    <div class="full-card-header">
-      <div class="full-card-title">รายรับ-รายจ่าย 7 วันล่าสุด</div>
-      <div class="full-card-badge badge-cyan">7 DAYS</div>
-    </div>
-    <div class="chart-area">
-      <div class="chart-bars" id="chart-bars">
-        <!-- JS inject -->
-      </div>
-      <div class="chart-legend">
-        <div class="legend-item"><div class="legend-dot" style="background:var(--lime)"></div>รายรับ</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--pink)"></div>รายจ่าย</div>
-      </div>
-    </div>
-  </div>
+  <script>
+    let html5QrcodeScanner;
 
-  <!-- Top products -->
-  <div class="full-card d6">
-    <div class="full-card-header">
-      <div class="full-card-title">สินค้าขายดีเดือนนี้</div>
-      <div class="full-card-badge badge-orange">TOP 5</div>
-    </div>
-    <div class="prod-list" id="top-products">
-      <!-- JS inject -->
-    </div>
-  </div>
-
-  <!-- Stock alerts -->
-  <div class="full-card d6">
-    <div class="full-card-header">
-      <div class="full-card-title">สถานะสต๊อก</div>
-      <div class="full-card-badge badge-pink" id="alert-badge">ตรวจสอบ</div>
-    </div>
-    <div id="stock-alerts">
-      <!-- JS inject -->
-    </div>
-  </div>
-
-  <!-- Refresh -->
-  <button class="refresh-btn" onclick="refreshData()">
-    ↻ &nbsp;รีเฟรชข้อมูล
-  </button>
-
-</div>
-
-<script>
-// ============================================================
-// DATA — แก้ตรงนี้ให้ตรงกับข้อมูลจริงของร้าน
-// หรือเชื่อมกับ Google Apps Script ผ่าน API
-// ============================================================
-const DEMO_DATA = {
-  todaySales: 1240,
-  todayCount: 18,
-  todayProfit: 385,
-  monthSales: 28500,
-  monthExpense: 4200,
-  monthProfit: 6800,
-  stockValue: 12400,
-  totalProducts: 47,
-  lowStockCount: 3,
-
-  // 7 วันล่าสุด (วันอาทิตย์ → เสาร์)
-  chartData: [
-    { day:'จ', income:3200, expense:800 },
-    { day:'อ', income:2800, expense:500 },
-    { day:'พ', income:4100, expense:1200 },
-    { day:'พฤ', income:3600, expense:600 },
-    { day:'ศ', income:5200, expense:900 },
-    { day:'ส', income:6800, expense:700 },
-    { day:'อา', income:1240, expense:500 },
-  ],
-
-  topProducts: [
-    { name:'มาม่าหมูสับ', sold:142, revenue:994, color:'#d4ff00' },
-    { name:'น้ำดื่ม 600ml', sold:98, revenue:588, color:'#00f5ff' },
-    { name:'ขนมปัง 7วัน', sold:67, revenue:1005, color:'#ff6b00' },
-    { name:'โค้ก 325ml', sold:54, revenue:810, color:'#ff2d78' },
-    { name:'บิสกิตโอรีโอ', sold:41, revenue:615, color:'#b44dff' },
-  ],
-
-  stockAlerts: [
-    { name:'มาม่าหมูสับ', current:3, min:5, status:'danger' },
-    { name:'น้ำปลาทิพรส', current:4, min:5, status:'danger' },
-    { name:'ข้าวสารถุง 1kg', current:6, min:5, status:'warn' },
-    { name:'น้ำดื่ม 600ml', current:24, min:10, status:'ok' },
-    { name:'บิสกิตโอรีโอ', current:15, min:5, status:'ok' },
-  ]
-};
-
-// ============================================================
-
-function fmt(n) {
-  if (n >= 1000) return (n/1000).toFixed(1) + 'k';
-  return n.toLocaleString();
-}
-
-function renderAll(d) {
-  // Big stats
-  document.querySelector('#today-sales span').textContent = fmt(d.todaySales);
-  document.getElementById('today-count').textContent = d.todayCount + ' รายการ';
-  const todayMargin = d.todaySales > 0 ? Math.round(d.todayProfit/d.todaySales*100) : 0;
-  document.querySelector('#today-profit span').textContent = fmt(d.todayProfit);
-  document.getElementById('profit-margin').textContent = 'margin ' + todayMargin + '%';
-  document.querySelector('#month-sales span').textContent = fmt(d.monthSales);
-  document.querySelector('#month-profit span').textContent = fmt(d.monthProfit);
-  document.getElementById('expense-sub').textContent = 'หักจ่าย ฿' + fmt(d.monthExpense);
-
-  // Mini
-  document.getElementById('total-products').textContent = d.totalProducts;
-  document.getElementById('low-stock-count').textContent = d.lowStockCount;
-  document.getElementById('stock-value').textContent = '฿' + fmt(d.stockValue);
-
-  // Meter
-  const netProfit = d.monthSales - d.monthExpense;
-  const marginPct = d.monthSales > 0 ? Math.round(netProfit/d.monthSales*100) : 0;
-  document.getElementById('margin-pct').textContent = marginPct + '%';
-  document.getElementById('total-income').textContent = '฿' + fmt(d.monthSales);
-  document.getElementById('total-expense').textContent = '฿' + fmt(d.monthExpense);
-  document.getElementById('net-profit').textContent = '฿' + fmt(netProfit);
-  setTimeout(() => {
-    document.getElementById('meter-fill').style.width = Math.min(marginPct * 2, 100) + '%';
-  }, 300);
-
-  // Chart
-  const maxVal = Math.max(...d.chartData.map(c => Math.max(c.income, c.expense)));
-  const barsEl = document.getElementById('chart-bars');
-  barsEl.innerHTML = '';
-  d.chartData.forEach((c, i) => {
-    const ih = Math.round((c.income / maxVal) * 90);
-    const eh = Math.round((c.expense / maxVal) * 90);
-    const group = document.createElement('div');
-    group.className = 'bar-group';
-    group.innerHTML = `
-      <div class="bars">
-        <div class="bar bar-income" style="height:${ih}px;transition-delay:${i*0.06}s"></div>
-        <div class="bar bar-expense" style="height:${eh}px;transition-delay:${i*0.06+0.03}s"></div>
-      </div>
-      <div class="bar-label">${c.day}</div>
-    `;
-    barsEl.appendChild(group);
-  });
-
-  // Top products
-  const maxRev = d.topProducts[0]?.revenue || 1;
-  const prodEl = document.getElementById('top-products');
-  prodEl.innerHTML = '';
-  d.topProducts.forEach((p, i) => {
-    const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n';
-    const pct = Math.round(p.revenue / maxRev * 100);
-    const el = document.createElement('div');
-    el.className = 'prod-item';
-    el.innerHTML = `
-      <div class="prod-rank ${rankClass}">${i+1}</div>
-      <div class="prod-info">
-        <div class="prod-name">${p.name}</div>
-        <div class="prod-sub">ขาย ${p.sold} ชิ้น</div>
-      </div>
-      <div class="prod-bar-wrap">
-        <div class="prod-bar-bg">
-          <div class="prod-bar-fill" style="width:0%;background:${p.color}" data-w="${pct}"></div>
-        </div>
-      </div>
-      <div class="prod-val" style="color:${p.color}">฿${fmt(p.revenue)}</div>
-    `;
-    prodEl.appendChild(el);
-  });
-  setTimeout(() => {
-    document.querySelectorAll('.prod-bar-fill').forEach(el => {
-      el.style.width = el.dataset.w + '%';
+    window.addEventListener('DOMContentLoaded', () => {
+      startScanner();
     });
-  }, 400);
 
-  // Stock alerts
-  const alertEl = document.getElementById('stock-alerts');
-  alertEl.innerHTML = '';
-  const dangerCount = d.stockAlerts.filter(a => a.status === 'danger').length;
-  document.getElementById('alert-badge').textContent = dangerCount > 0 ? `${dangerCount} วิกฤต` : 'ปกติ';
-  d.stockAlerts.forEach(a => {
-    const icon = a.status === 'danger' ? '🔴' : a.status === 'warn' ? '🟡' : '🟢';
-    const pillClass = a.status === 'danger' ? 'stock-danger' : a.status === 'warn' ? 'stock-warn' : 'stock-ok';
-    const label = a.status === 'danger' ? 'ใกล้หมด!' : a.status === 'warn' ? 'เหลือน้อย' : 'ปกติ';
-    const el = document.createElement('div');
-    el.className = 'alert-item';
-    el.innerHTML = `
-      <div class="alert-icon">${icon}</div>
-      <div class="alert-info">
-        <div class="alert-name">${a.name}</div>
-        <div class="alert-sub">เหลือ ${a.current} / ขั้นต่ำ ${a.min}</div>
-      </div>
-      <div class="stock-pill ${pillClass}">${label}</div>
-    `;
-    alertEl.appendChild(el);
-  });
-}
+    function startScanner() {
+      html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
+        fps: 15, 
+        qrbox: { width: 250, height: 180 },
+        rememberLastUsedCamera: true
+      });
+      html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+      document.getElementById('scan-status').innerText = "🔮 นำรหัส QR Code หรือบาร์โค้ดมาส่องหน้ากล้องได้เลย";
+    }
 
-function refreshData() {
-  const btn = document.querySelector('.refresh-btn');
-  btn.textContent = '⏳  กำลังโหลด...';
-  btn.disabled = true;
-  setTimeout(() => {
-    renderAll(DEMO_DATA);
-    btn.textContent = '↻  รีเฟรชข้อมูล';
-    btn.disabled = false;
-  }, 800);
-}
+    function onScanSuccess(decodedText, decodedResult) {
+      if (navigator.vibrate) navigator.vibrate(100); // สั่นเตือนสั้นๆ ถ้ามือถือทำได้
+      
+      document.getElementById('barcode').value = decodedText;
+      document.getElementById('scan-status').innerText = "✅ สแกนรหัสสำเร็จ! กรุณากรอกข้อมูลขนมด้านล่างต่อ";
+      document.getElementById('scan-status').className = "text-xs text-center mt-2 text-green-600 font-bold";
+    }
 
-// Clock
-function updateClock() {
-  const now = new Date();
-  const d = String(now.getDate()).padStart(2,'0');
-  const m = String(now.getMonth()+1).padStart(2,'0');
-  const y = now.getFullYear();
-  const h = String(now.getHours()).padStart(2,'0');
-  const mi = String(now.getMinutes()).padStart(2,'0');
-  const s = String(now.getSeconds()).padStart(2,'0');
-  document.getElementById('clock').textContent = `${d}/${m}/${y}  ${h}:${mi}:${s}`;
-}
-setInterval(updateClock, 1000);
-updateClock();
+    function onScanFailure(error) {
+      // ปล่อยผ่านเพื่อให้สแกนเฟรมถัดไปเรื่อยๆ อัตโนมัติ
+    }
 
-// Init
-renderAll(DEMO_DATA);
-</script>
+    function submitForm(e) {
+      e.preventDefault();
+      
+      const barcode = document.getElementById('barcode').value;
+      if(!barcode) {
+        alert("⚠️ กรุณาสแกนรหัสสินค้าก่อนกดบันทึกครับ");
+        return;
+      }
+
+      const btnSubmit = document.getElementById('btnSubmit');
+      btnSubmit.innerText = "⏳ กำลังบันทึกข้อมูลสินค้าลงชีต...";
+      btnSubmit.disabled = true;
+
+      const productData = {
+        barcode: barcode,
+        name: document.getElementById('productName').value,
+        cost: document.getElementById('productCost').value,
+        price: document.getElementById('productPrice').value,
+        stock: document.getElementById('productStock').value
+      };
+
+      // ส่งคำสั่งข้ามไปที่ฟังก์ชันฝั่ง Code.gs
+      google.script.run
+        .withSuccessHandler(function(response) {
+          alert(response.message);
+          if(response.success) {
+            // เคลียร์ฟอร์ม ยกเว้นตัวสแกน เพื่อรอสแกนชิ้นถัดไป
+            document.getElementById('productForm').reset();
+            document.getElementById('barcode').value = "";
+            document.getElementById('scan-status').innerText = "🔮 นำรหัส QR Code หรือบาร์โค้ดชิ้นต่อไปมาส่องได้เลย";
+            document.getElementById('scan-status').className = "text-xs text-center mt-2 text-slate-500 font-medium";
+          }
+          btnSubmit.innerText = "💾 เพิ่มสินค้าเข้าคลัง";
+          btnSubmit.disabled = false;
+        })
+        .withFailureHandler(function(error) {
+          alert("❌ เกิดข้อผิดพลาดของระบบ: " + error.message);
+          btnSubmit.innerText = "💾 เพิ่มสินค้าเข้าคลัง";
+          btnSubmit.disabled = false;
+        })
+        .registerNewProduct(productData);
+    }
+  </script>
 </body>
 </html>
