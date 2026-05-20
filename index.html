@@ -3,693 +3,616 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Personal Calendar 2026</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=Space+Mono:wght@400;700&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>ร้านขายของเล็กๆ — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700;800;900&family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #060810;
-  --bg2: #0b0e18;
-  --glass: rgba(255,255,255,0.03);
-  --glass2: rgba(255,255,255,0.06);
-  --border: rgba(255,255,255,0.08);
-  --border2: rgba(255,255,255,0.13);
-  --g1: #00f5a0;
-  --g2: #00d9f5;
-  --orange: #ff6b35;
+  --lime: #d4ff00;
+  --cyan: #00f5ff;
   --pink: #ff2d78;
-  --yellow: #ffd60a;
-  --purple: #bf5af2;
+  --orange: #ff6b00;
+  --purple: #b44dff;
+  --green: #00e676;
+  --bg: #080c10;
+  --surface: #0e1420;
+  --card: #111827;
+  --border: #1e2d40;
   --text: #f0f4ff;
-  --muted: #4a5568;
-  --muted2: #718096;
-  --done: #2d3748;
-  --done-text: #4a5568;
+  --muted: #4a6080;
 }
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Sarabun', sans-serif;
+  font-family: 'Kanit', sans-serif;
+  font-weight: 400;
   min-height: 100vh;
   overflow-x: hidden;
 }
 
-/* Animated bg mesh */
-.bg-mesh {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background:
-    radial-gradient(ellipse 60% 40% at 10% 20%, rgba(0,245,160,0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 60% at 90% 80%, rgba(0,217,245,0.05) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 50% at 50% 50%, rgba(191,90,242,0.04) 0%, transparent 60%);
-  animation: meshMove 12s ease-in-out infinite alternate;
-}
-@keyframes meshMove {
-  0%  { transform: scale(1) rotate(0deg); }
-  100%{ transform: scale(1.08) rotate(2deg); }
+/* Animated background grid */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
 }
 
-.wrapper {
-  position: relative; z-index: 1;
-  max-width: 1380px; margin: 0 auto;
-  padding: 28px 28px 48px;
+/* Glowing orbs */
+.orb {
+  position: fixed; border-radius: 50%;
+  filter: blur(80px); pointer-events: none; z-index: 0;
+  animation: orbFloat 8s ease-in-out infinite;
+}
+.orb1 { width:400px; height:400px; background:rgba(212,255,0,0.06); top:-100px; left:-100px; animation-delay:0s; }
+.orb2 { width:300px; height:300px; background:rgba(0,245,255,0.07); bottom:-50px; right:-50px; animation-delay:-3s; }
+.orb3 { width:200px; height:200px; background:rgba(255,45,120,0.05); top:50%; left:50%; animation-delay:-5s; }
+
+@keyframes orbFloat {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(30px,-20px) scale(1.05); }
+  66% { transform: translate(-20px,15px) scale(0.95); }
 }
 
-/* ─── TOP BAR ─── */
-.topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 36px;
+/* Layout */
+.wrapper { position: relative; z-index: 1; padding: 16px; max-width: 480px; margin: 0 auto; }
+
+/* Header */
+.header {
+  margin-bottom: 20px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(212,255,0,0.08), rgba(0,245,255,0.05));
+  border: 1px solid rgba(212,255,0,0.2);
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  animation: slideDown 0.5s ease;
 }
-.logo {
-  display: flex; align-items: center; gap: 14px;
+.header::after {
+  content: '🛒';
+  position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
+  font-size: 48px; opacity: 0.15;
 }
-.logo-icon {
-  width: 44px; height: 44px; border-radius: 12px;
-  background: linear-gradient(135deg, var(--g1), var(--g2));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
-  box-shadow: 0 0 24px rgba(0,245,160,0.35);
+.header-sub { font-size: 11px; font-weight: 300; color: var(--lime); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 4px; }
+.header h1 { font-size: 22px; font-weight: 800; color: #fff; line-height: 1.2; }
+.header-time { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); margin-top: 6px; }
+.live-dot {
+  display: inline-block; width: 6px; height: 6px;
+  background: var(--lime); border-radius: 50%; margin-right: 6px;
+  animation: pulse 1.5s ease-in-out infinite;
 }
-.logo-text .title {
-  font-family: 'Kanit', sans-serif;
-  font-size: 20px; font-weight: 600;
-  background: linear-gradient(90deg, var(--g1), var(--g2));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+
+/* Big stat row */
+.big-row {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px; margin-bottom: 12px;
+}
+.big-card {
+  background: var(--card);
+  border-radius: 18px;
+  padding: 18px 16px;
+  border: 1px solid var(--border);
+  position: relative; overflow: hidden;
+  animation: fadeUp 0.5s ease both;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.big-card:hover { transform: translateY(-3px); }
+.big-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  border-radius: 18px 18px 0 0;
+}
+.big-card.lime::before { background: linear-gradient(90deg, var(--lime), var(--cyan)); border-color: rgba(212,255,0,0.2); }
+.big-card.pink::before { background: linear-gradient(90deg, var(--pink), var(--purple)); }
+.big-card.cyan::before { background: linear-gradient(90deg, var(--cyan), var(--green)); }
+.big-card.orange::before { background: linear-gradient(90deg, var(--orange), var(--pink)); }
+
+.big-card:hover { border-color: rgba(255,255,255,0.1); }
+.big-card .label { font-size: 11px; font-weight: 300; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 6px; }
+.big-card .value {
+  font-size: 24px; font-weight: 800;
+  font-family: 'IBM Plex Mono', monospace;
   line-height: 1;
 }
-.logo-text .sub {
-  font-family: 'Space Mono', monospace;
-  font-size: 10px; color: var(--muted2);
-  margin-top: 3px; letter-spacing: 1px;
+.big-card.lime .value { color: var(--lime); }
+.big-card.pink .value { color: var(--pink); }
+.big-card.cyan .value { color: var(--cyan); }
+.big-card.orange .value { color: var(--orange); }
+.big-card .unit { font-size: 11px; font-weight: 300; opacity: 0.6; margin-left: 2px; }
+.big-card .sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
+.big-card .trend {
+  position: absolute; top: 14px; right: 14px;
+  font-size: 11px; font-weight: 600; padding: 2px 8px;
+  border-radius: 20px;
 }
-.topbar-right {
-  display: flex; align-items: center; gap: 16px;
-}
-.live-dot {
-  display: flex; align-items: center; gap: 8px;
-  font-family: 'Space Mono', monospace; font-size: 11px; color: var(--g1);
-}
-.dot-pulse {
-  width: 8px; height: 8px; border-radius: 50%; background: var(--g1);
-  animation: pulse 2s ease infinite;
-  box-shadow: 0 0 8px var(--g1);
-}
-@keyframes pulse {
-  0%,100%{ transform: scale(1); opacity:1; }
-  50%     { transform: scale(1.4); opacity:0.7; }
-}
-.topbar-date {
-  font-family: 'Space Mono', monospace; font-size: 12px;
-  color: var(--muted2); text-align: right;
-}
+.trend-up { background: rgba(0,230,118,0.15); color: var(--green); }
+.trend-dn { background: rgba(255,45,120,0.15); color: var(--pink); }
 
-/* ─── STAT CARDS ─── */
-.stats {
-  display: grid; grid-template-columns: repeat(4,1fr); gap: 16px;
-  margin-bottom: 28px;
-}
-.stat {
-  background: var(--glass2);
+/* Full-width card */
+.full-card {
+  background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 16px; padding: 20px 22px;
-  position: relative; overflow: hidden;
-  cursor: default;
-  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 18px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  animation: fadeUp 0.5s ease both;
 }
-.stat:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(0,0,0,0.4); }
-.stat::before {
-  content:''; position:absolute; inset:0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%);
-  pointer-events:none;
+.full-card-header {
+  padding: 14px 18px 0;
+  display: flex; align-items: center; justify-content: space-between;
 }
-.stat-glow {
-  position:absolute; top:-40px; right:-40px;
-  width:120px; height:120px; border-radius:50%;
-  filter: blur(40px); opacity:0.3;
+.full-card-title { font-size: 13px; font-weight: 700; color: var(--text); }
+.full-card-badge {
+  font-size: 10px; font-weight: 600; padding: 3px 10px;
+  border-radius: 20px; letter-spacing: 0.5px;
 }
-.stat-icon { font-size:24px; margin-bottom:12px; }
-.stat-num {
-  font-family:'Space Mono',monospace;
-  font-size:38px; font-weight:700; line-height:1;
-  margin-bottom:6px;
-}
-.stat-label { font-size:12px; color:var(--muted2); letter-spacing:0.5px; }
+.badge-lime { background: rgba(212,255,0,0.12); color: var(--lime); border: 1px solid rgba(212,255,0,0.2); }
+.badge-cyan { background: rgba(0,245,255,0.12); color: var(--cyan); border: 1px solid rgba(0,245,255,0.2); }
+.badge-pink { background: rgba(255,45,120,0.12); color: var(--pink); border: 1px solid rgba(255,45,120,0.2); }
+.badge-orange { background: rgba(255,107,0,0.12); color: var(--orange); border: 1px solid rgba(255,107,0,0.2); }
 
-/* ─── MAIN LAYOUT ─── */
-.main { display:grid; grid-template-columns:1fr 360px; gap:20px; align-items:start; }
+/* Bar chart */
+.chart-area { padding: 16px 18px 18px; }
+.chart-bars {
+  display: flex; align-items: flex-end;
+  gap: 6px; height: 100px;
+}
+.bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.bars { display: flex; gap: 2px; align-items: flex-end; width: 100%; }
+.bar {
+  flex: 1; border-radius: 4px 4px 0 0;
+  transition: height 0.8s cubic-bezier(.34,1.56,.64,1);
+  min-height: 2px;
+}
+.bar-income { background: linear-gradient(180deg, var(--lime), rgba(212,255,0,0.4)); }
+.bar-expense { background: linear-gradient(180deg, var(--pink), rgba(255,45,120,0.4)); }
+.bar-label { font-size: 9px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+.chart-legend {
+  display: flex; gap: 16px; margin-top: 12px;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+.legend-dot { width: 8px; height: 8px; border-radius: 2px; }
 
-/* ─── PANEL ─── */
-.panel {
-  background: var(--glass);
+/* Product list */
+.prod-list { padding: 0 0 4px; }
+.prod-item {
+  display: flex; align-items: center;
+  padding: 12px 18px;
+  border-bottom: 1px solid rgba(30,45,64,0.5);
+  transition: background 0.15s;
+}
+.prod-item:last-child { border-bottom: none; }
+.prod-item:hover { background: rgba(255,255,255,0.02); }
+.prod-rank {
+  width: 24px; height: 24px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; margin-right: 12px; flex-shrink: 0;
+}
+.rank-1 { background: linear-gradient(135deg,#ffd700,#ff8c00); color: #000; }
+.rank-2 { background: linear-gradient(135deg,#c0c0c0,#808080); color: #000; }
+.rank-3 { background: linear-gradient(135deg,#cd7f32,#8b4513); color: #fff; }
+.rank-n { background: rgba(255,255,255,0.05); color: var(--muted); }
+.prod-info { flex: 1; min-width: 0; }
+.prod-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prod-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.prod-bar-wrap { width: 80px; margin: 0 12px; }
+.prod-bar-bg { height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+.prod-bar-fill { height: 100%; border-radius: 2px; transition: width 1s cubic-bezier(.34,1.56,.64,1); }
+.prod-val { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 700; text-align: right; }
+
+/* Stock alert */
+.alert-item {
+  display: flex; align-items: center;
+  padding: 10px 18px;
+  border-bottom: 1px solid rgba(30,45,64,0.5);
+}
+.alert-item:last-child { border-bottom: none; }
+.alert-icon { font-size: 18px; margin-right: 12px; }
+.alert-info { flex: 1; }
+.alert-name { font-size: 13px; font-weight: 600; }
+.alert-sub { font-size: 11px; color: var(--muted); }
+.stock-pill {
+  font-size: 11px; font-weight: 700; padding: 4px 10px;
+  border-radius: 20px; font-family: 'IBM Plex Mono', monospace;
+}
+.stock-danger { background: rgba(255,45,120,0.15); color: var(--pink); border: 1px solid rgba(255,45,120,0.3); }
+.stock-warn { background: rgba(255,107,0,0.15); color: var(--orange); border: 1px solid rgba(255,107,0,0.3); }
+.stock-ok { background: rgba(0,230,118,0.15); color: var(--green); border: 1px solid rgba(0,230,118,0.3); }
+
+/* Stat row 3 */
+.stat-row {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px; margin-bottom: 12px;
+}
+.mini-card {
+  background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 20px; overflow:hidden;
-  backdrop-filter: blur(12px);
+  border-radius: 14px;
+  padding: 14px 12px;
+  text-align: center;
+  animation: fadeUp 0.5s ease both;
 }
-.panel-head {
-  padding: 18px 22px;
-  border-bottom: 1px solid var(--border);
-  display:flex; align-items:center; justify-content:space-between;
-  background: var(--glass2);
-}
-.panel-head-left { display:flex; align-items:center; gap:10px; }
-.panel-icon { font-size:16px; }
-.panel-name {
-  font-family:'Kanit',sans-serif; font-size:13px; font-weight:500;
-  letter-spacing:1px; text-transform:uppercase; color:var(--muted2);
-}
-.panel-count {
-  font-family:'Space Mono',monospace; font-size:11px;
-  padding:3px 10px; border-radius:20px;
-  background:rgba(0,245,160,0.1); color:var(--g1); border:1px solid rgba(0,245,160,0.2);
-}
+.mini-icon { font-size: 22px; margin-bottom: 6px; }
+.mini-val { font-size: 18px; font-weight: 800; font-family: 'IBM Plex Mono', monospace; }
+.mini-label { font-size: 10px; color: var(--muted); margin-top: 3px; }
 
-/* ─── FILTER TABS ─── */
-.filters {
-  display:flex; gap:8px; padding:14px 22px;
-  border-bottom:1px solid var(--border);
-  background:rgba(0,0,0,0.2);
-  overflow-x:auto;
+/* Profit meter */
+.meter-wrap { padding: 16px 18px 18px; }
+.meter-label-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; }
+.meter-track { height: 10px; background: rgba(255,255,255,0.06); border-radius: 20px; overflow: hidden; }
+.meter-fill {
+  height: 100%; border-radius: 20px;
+  background: linear-gradient(90deg, var(--lime), var(--cyan));
+  transition: width 1.2s cubic-bezier(.34,1.56,.64,1);
+  position: relative;
 }
-.filters::-webkit-scrollbar { height:0; }
-.fb {
-  font-family:'Sarabun',sans-serif; font-size:12px; font-weight:500;
-  padding:6px 16px; border-radius:30px;
-  border:1px solid var(--border2);
-  background:transparent; color:var(--muted2);
-  cursor:pointer; white-space:nowrap;
-  transition:all 0.2s; flex-shrink:0;
+.meter-fill::after {
+  content: '';
+  position: absolute; right: 0; top: 0; bottom: 0; width: 20px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+  animation: shimmer 1.5s ease-in-out infinite;
 }
-.fb:hover { color:var(--text); border-color:rgba(255,255,255,0.25); }
-.fb.active {
-  background:linear-gradient(135deg,var(--g1),var(--g2));
-  border-color:transparent; color:#060810; font-weight:700;
-  box-shadow:0 4px 16px rgba(0,245,160,0.3);
-}
-.fb.done-btn.active {
-  background:linear-gradient(135deg,#4a5568,#718096);
-  color:var(--text); box-shadow:none;
-}
+@keyframes shimmer { 0%,100%{opacity:0} 50%{opacity:1} }
+.margin-pct { font-size: 28px; font-weight: 900; color: var(--lime); font-family: 'IBM Plex Mono', monospace; }
 
-/* ─── EVENT LIST ─── */
-.elist { max-height:560px; overflow-y:auto; }
-.elist::-webkit-scrollbar { width:3px; }
-.elist::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+/* Animations */
+@keyframes slideDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+.d1{animation-delay:0.05s} .d2{animation-delay:0.1s} .d3{animation-delay:0.15s}
+.d4{animation-delay:0.2s} .d5{animation-delay:0.25s} .d6{animation-delay:0.3s}
 
-.month-sep {
-  padding:12px 22px 6px;
-  font-family:'Space Mono',monospace; font-size:10px;
-  color:var(--muted); letter-spacing:3px; text-transform:uppercase;
-  position:sticky; top:0;
-  background:linear-gradient(180deg,var(--bg2) 60%,transparent);
-  z-index:2;
-  display:flex; align-items:center; gap:12px;
+/* Refresh btn */
+.refresh-btn {
+  width: 100%; margin-bottom: 12px;
+  background: linear-gradient(135deg, rgba(212,255,0,0.1), rgba(0,245,255,0.08));
+  border: 1px solid rgba(212,255,0,0.25);
+  color: var(--lime);
+  font-family: 'Kanit', sans-serif;
+  font-size: 13px; font-weight: 600;
+  padding: 14px;
+  border-radius: 14px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+  animation: fadeUp 0.5s ease both;
 }
-.month-sep::after {
-  content:''; flex:1; height:1px;
-  background:linear-gradient(90deg,var(--border),transparent);
-}
+.refresh-btn:hover { background: rgba(212,255,0,0.15); transform: scale(1.01); }
+.refresh-btn:active { transform: scale(0.98); }
 
-.eitem {
-  display:flex; align-items:center; gap:16px;
-  padding:13px 22px;
-  border-bottom:1px solid rgba(255,255,255,0.03);
-  cursor:pointer; position:relative;
-  transition:background 0.15s;
-  animation:slideIn 0.35s ease both;
-}
-@keyframes slideIn {
-  from{opacity:0;transform:translateX(-12px)}
-  to{opacity:1;transform:none}
-}
-.eitem:hover { background:var(--glass2); }
-
-.eitem.done {
-  opacity:0.45;
-}
-.eitem.done .ename { text-decoration:line-through; color:var(--done-text); }
-.eitem.done .edate .day { color:var(--done-text); }
-
-.eitem.is-today {
-  background:linear-gradient(90deg,rgba(0,245,160,0.06),transparent);
-  border-left:2px solid var(--g1);
-}
-.eitem.is-today::before {
-  content:'TODAY';
-  position:absolute; right:22px; top:50%; transform:translateY(-50%);
-  font-family:'Space Mono',monospace; font-size:9px;
-  color:var(--g1); letter-spacing:2px;
-  background:rgba(0,245,160,0.1); padding:3px 8px; border-radius:4px;
-}
-
-.edate {
-  min-width:44px; text-align:center;
-  font-family:'Space Mono',monospace;
-}
-.edate .day { font-size:20px; font-weight:700; line-height:1.1; }
-.edate .dow { font-size:9px; color:var(--muted2); text-transform:uppercase; margin-top:1px; }
-
-.ebar {
-  width:3px; height:44px; border-radius:2px; flex-shrink:0;
-}
-
-.einfo { flex:1; min-width:0; }
-.ename { font-size:14px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.emeta { font-size:11px; color:var(--muted2); margin-top:3px; display:flex; align-items:center; gap:8px; }
-.emeta .chip {
-  font-family:'Space Mono',monospace; font-size:9px;
-  padding:2px 7px; border-radius:4px; letter-spacing:0.5px;
-}
-
-.etag {
-  font-family:'Space Mono',monospace; font-size:9px;
-  padding:4px 10px; border-radius:6px; flex-shrink:0; letter-spacing:0.5px;
-}
-
-/* done badge */
-.done-badge {
-  font-size:14px; flex-shrink:0;
-}
-
-/* ─── SIDEBAR ─── */
-.sidebar { display:flex; flex-direction:column; gap:16px; }
-
-/* mini cal */
-.cal-wrap { padding:18px 20px; }
-.cal-nav {
-  display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;
-}
-.cal-month { font-family:'Kanit',sans-serif; font-size:15px; font-weight:500; }
-.cal-btn {
-  background:var(--glass2); border:1px solid var(--border);
-  color:var(--text); width:30px; height:30px; border-radius:8px;
-  cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;
-  transition:all 0.2s;
-}
-.cal-btn:hover { background:var(--glass2); border-color:var(--border2); }
-.cal-dow {
-  display:grid; grid-template-columns:repeat(7,1fr);
-  margin-bottom:8px;
-}
-.cal-dow span {
-  text-align:center; font-family:'Space Mono',monospace;
-  font-size:9px; color:var(--muted); padding:4px 0; letter-spacing:1px;
-}
-.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
-.cday {
-  aspect-ratio:1; display:flex; align-items:center; justify-content:center;
-  font-size:12px; border-radius:8px; cursor:pointer;
-  position:relative; transition:all 0.15s;
-}
-.cday:hover { background:var(--glass2); }
-.cday.other { color:var(--muted); opacity:0.3; }
-.cday.holiday { color:var(--yellow); }
-.cday.has-event::after {
-  content:''; position:absolute; bottom:3px;
-  width:4px; height:4px; border-radius:50%;
-  background:var(--orange);
-}
-.cday.today {
-  background:linear-gradient(135deg,var(--g1),var(--g2));
-  color:#000; font-weight:700;
-  box-shadow:0 4px 14px rgba(0,245,160,0.4);
-}
-.cday.today::after { background:#000 !important; }
-.cday.done-day { opacity:0.5; }
-
-/* progress */
-.progress-section { padding:16px 22px; }
-.prog-label { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-.prog-text { font-size:12px; color:var(--muted2); }
-.prog-pct { font-family:'Space Mono',monospace; font-size:12px; color:var(--g1); }
-.prog-track {
-  height:6px; border-radius:3px; background:rgba(255,255,255,0.06);
-  overflow:hidden;
-}
-.prog-fill {
-  height:100%; border-radius:3px;
-  background:linear-gradient(90deg,var(--g1),var(--g2));
-  transition:width 1s cubic-bezier(.22,1,.36,1);
-  box-shadow:0 0 8px var(--g1);
-}
-
-/* remind cards */
-.remind-list { padding:8px 0; }
-.rcard {
-  margin:6px 14px;
-  background:var(--glass2); border:1px solid var(--border);
-  border-radius:12px; padding:12px 14px;
-  display:flex; gap:12px; align-items:flex-start;
-  transition:transform 0.2s, box-shadow 0.2s;
-}
-.rcard:hover { transform:translateX(4px); }
-.rcard.done-card { opacity:0.4; filter:grayscale(0.6); }
-.rcard-icon {
-  width:32px; height:32px; border-radius:8px;
-  display:flex; align-items:center; justify-content:center; font-size:15px;
-  flex-shrink:0;
-}
-.rcard-body { flex:1; min-width:0; }
-.rcard-title { font-size:13px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.rcard-title.done-title { text-decoration:line-through; color:var(--muted2); }
-.rcard-date { font-family:'Space Mono',monospace; font-size:10px; color:var(--muted2); margin-top:3px; }
-.rcard-diff { font-size:10px; margin-top:4px; }
-.rcard-diff.overdue { color:var(--muted2); }
-.rcard-diff.today-label { color:var(--g1); font-weight:600; }
-.rcard-diff.upcoming { color:var(--orange); }
-
-/* section label */
-.done-section-label {
-  padding:8px 22px 2px;
-  font-family:'Space Mono',monospace; font-size:9px;
-  color:var(--muted); letter-spacing:3px;
-  text-transform:uppercase;
-  display:flex; align-items:center; gap:10px;
-}
-.done-section-label::after {
-  content:''; flex:1; height:1px;
-  background:linear-gradient(90deg,var(--border),transparent);
-}
-
-/* scrollbar global */
-::-webkit-scrollbar { width:4px; height:4px; }
-::-webkit-scrollbar-track { background:transparent; }
-::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:2px; }
+.pb { padding-bottom: 20px; }
 </style>
 </head>
 <body>
-<div class="bg-mesh"></div>
-<div class="wrapper">
 
-<!-- TOP BAR -->
-<div class="topbar">
-  <div class="logo">
-    <div class="logo-icon">📅</div>
-    <div class="logo-text">
-      <div class="title">My Calendar</div>
-      <div class="sub">suchin05042538@gmail.com</div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<div class="wrapper pb">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-sub">ระบบจัดการร้าน</div>
+    <h1>ร้านขายของเล็กๆ</h1>
+    <div class="header-time">
+      <span class="live-dot"></span>
+      <span id="clock">--/--/---- --:--:--</span>
     </div>
   </div>
-  <div class="topbar-right">
-    <div class="live-dot"><div class="dot-pulse"></div>LIVE SYNC</div>
-    <div class="topbar-date" id="todayLabel"></div>
-  </div>
-</div>
 
-<!-- STATS -->
-<div class="stats" id="statsRow"></div>
-
-<!-- MAIN -->
-<div class="main">
-
-  <!-- LEFT PANEL -->
-  <div class="panel">
-    <div class="panel-head">
-      <div class="panel-head-left">
-        <span class="panel-icon">🗓</span>
-        <span class="panel-name">รายการกิจกรรม</span>
-      </div>
-      <span class="panel-count" id="countBadge"></span>
+  <!-- Big stats -->
+  <div class="big-row">
+    <div class="big-card lime d1">
+      <div class="label">ยอดขายวันนี้</div>
+      <div class="value" id="today-sales">฿<span>0</span></div>
+      <div class="sub" id="today-count">0 รายการ</div>
+      <div class="trend trend-up" id="today-trend">+0%</div>
     </div>
-    <div class="filters" id="filterBar"></div>
-    <div class="elist" id="eventList"></div>
+    <div class="big-card pink d2">
+      <div class="label">กำไรวันนี้</div>
+      <div class="value" id="today-profit">฿<span>0</span></div>
+      <div class="sub" id="profit-margin">margin 0%</div>
+    </div>
   </div>
 
-  <!-- SIDEBAR -->
-  <div class="sidebar">
+  <div class="big-row">
+    <div class="big-card cyan d3">
+      <div class="label">ยอดขายเดือนนี้</div>
+      <div class="value" id="month-sales">฿<span>0</span></div>
+      <div class="sub" id="month-days">เดือนนี้</div>
+    </div>
+    <div class="big-card orange d4">
+      <div class="label">กำไรสุทธิเดือน</div>
+      <div class="value" id="month-profit">฿<span>0</span></div>
+      <div class="sub" id="expense-sub">หักค่าใช้จ่าย</div>
+    </div>
+  </div>
 
-    <!-- MINI CAL -->
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-head-left"><span class="panel-icon">📆</span><span class="panel-name">ปฏิทิน</span></div>
+  <!-- Mini stats -->
+  <div class="stat-row">
+    <div class="mini-card d1">
+      <div class="mini-icon">📦</div>
+      <div class="mini-val" id="total-products" style="color:var(--cyan)">0</div>
+      <div class="mini-label">รายการสินค้า</div>
+    </div>
+    <div class="mini-card d2">
+      <div class="mini-icon">⚠️</div>
+      <div class="mini-val" id="low-stock-count" style="color:var(--pink)">0</div>
+      <div class="mini-label">ใกล้หมด</div>
+    </div>
+    <div class="mini-card d3">
+      <div class="mini-icon">💼</div>
+      <div class="mini-val" id="stock-value" style="color:var(--lime)">฿0</div>
+      <div class="mini-label">มูลค่าสต๊อก</div>
+    </div>
+  </div>
+
+  <!-- Profit meter -->
+  <div class="full-card d4">
+    <div class="full-card-header">
+      <div class="full-card-title">Profit Margin เดือนนี้</div>
+      <div class="full-card-badge badge-lime">LIVE</div>
+    </div>
+    <div class="meter-wrap">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:12px">
+        <div class="margin-pct" id="margin-pct">0%</div>
+        <div style="font-size:12px;color:var(--muted)" id="margin-sub">จากยอดขายทั้งหมด</div>
       </div>
-      <div class="cal-wrap">
-        <div class="cal-nav">
-          <button class="cal-btn" onclick="prevM()">‹</button>
-          <span class="cal-month" id="calTitle"></span>
-          <button class="cal-btn" onclick="nextM()">›</button>
+      <div class="meter-label-row">
+        <span style="color:var(--muted);font-size:11px">0%</span>
+        <span style="color:var(--muted);font-size:11px">50%</span>
+        <span style="color:var(--muted);font-size:11px">100%</span>
+      </div>
+      <div class="meter-track">
+        <div class="meter-fill" id="meter-fill" style="width:0%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:12px">
+        <div style="text-align:center">
+          <div style="font-size:12px;color:var(--muted)">รายรับ</div>
+          <div style="font-size:14px;font-weight:700;color:var(--lime);font-family:'IBM Plex Mono',monospace" id="total-income">฿0</div>
         </div>
-        <div class="cal-dow"><span>อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span>ส</span></div>
-        <div class="cal-grid" id="calGrid"></div>
-      </div>
-      <!-- Progress -->
-      <div style="border-top:1px solid var(--border)">
-        <div class="progress-section">
-          <div class="prog-label">
-            <span class="prog-text">กิจกรรมที่เสร็จแล้ว</span>
-            <span class="prog-pct" id="progPct"></span>
-          </div>
-          <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+        <div style="text-align:center">
+          <div style="font-size:12px;color:var(--muted)">รายจ่าย</div>
+          <div style="font-size:14px;font-weight:700;color:var(--pink);font-family:'IBM Plex Mono',monospace" id="total-expense">฿0</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:12px;color:var(--muted)">กำไรสุทธิ</div>
+          <div style="font-size:14px;font-weight:700;color:var(--cyan);font-family:'IBM Plex Mono',monospace" id="net-profit">฿0</div>
         </div>
       </div>
     </div>
-
-    <!-- REMINDERS -->
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-head-left"><span class="panel-icon">🔔</span><span class="panel-name">แจ้งเตือน</span></div>
-        <span class="panel-count" id="remindBadge"></span>
-      </div>
-      <div class="remind-list" id="remindCards"></div>
-    </div>
-
   </div>
-</div>
+
+  <!-- Sales chart -->
+  <div class="full-card d5">
+    <div class="full-card-header">
+      <div class="full-card-title">รายรับ-รายจ่าย 7 วันล่าสุด</div>
+      <div class="full-card-badge badge-cyan">7 DAYS</div>
+    </div>
+    <div class="chart-area">
+      <div class="chart-bars" id="chart-bars">
+        <!-- JS inject -->
+      </div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--lime)"></div>รายรับ</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--pink)"></div>รายจ่าย</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top products -->
+  <div class="full-card d6">
+    <div class="full-card-header">
+      <div class="full-card-title">สินค้าขายดีเดือนนี้</div>
+      <div class="full-card-badge badge-orange">TOP 5</div>
+    </div>
+    <div class="prod-list" id="top-products">
+      <!-- JS inject -->
+    </div>
+  </div>
+
+  <!-- Stock alerts -->
+  <div class="full-card d6">
+    <div class="full-card-header">
+      <div class="full-card-title">สถานะสต๊อก</div>
+      <div class="full-card-badge badge-pink" id="alert-badge">ตรวจสอบ</div>
+    </div>
+    <div id="stock-alerts">
+      <!-- JS inject -->
+    </div>
+  </div>
+
+  <!-- Refresh -->
+  <button class="refresh-btn" onclick="refreshData()">
+    ↻ &nbsp;รีเฟรชข้อมูล
+  </button>
+
 </div>
 
 <script>
-const TODAY = new Date(2026, 4, 20);
-const MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-const DOWS = ['อา','จ','อ','พ','พฤ','ศ','ส'];
-const DAYS_FULL = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+// ============================================================
+// DATA — แก้ตรงนี้ให้ตรงกับข้อมูลจริงของร้าน
+// หรือเชื่อมกับ Google Apps Script ผ่าน API
+// ============================================================
+const DEMO_DATA = {
+  todaySales: 1240,
+  todayCount: 18,
+  todayProfit: 385,
+  monthSales: 28500,
+  monthExpense: 4200,
+  monthProfit: 6800,
+  stockValue: 12400,
+  totalProducts: 47,
+  lowStockCount: 3,
 
-function pd(s){ const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
-function fmtDate(d){ return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()+543}`; }
-function isToday(d){ return d.toDateString()===TODAY.toDateString(); }
-function isPast(d){ return d < TODAY && !isToday(d); }
+  // 7 วันล่าสุด (วันอาทิตย์ → เสาร์)
+  chartData: [
+    { day:'จ', income:3200, expense:800 },
+    { day:'อ', income:2800, expense:500 },
+    { day:'พ', income:4100, expense:1200 },
+    { day:'พฤ', income:3600, expense:600 },
+    { day:'ศ', income:5200, expense:900 },
+    { day:'ส', income:6800, expense:700 },
+    { day:'อา', income:1240, expense:500 },
+  ],
 
-// ── DATA ──
-const allEvents = [
-  // HOLIDAYS
-  {date:'2026-01-01',title:'วันขึ้นปีใหม่',type:'holiday'},
-  {date:'2026-01-10',title:'วันเด็กแห่งชาติ',type:'holiday'},
-  {date:'2026-01-16',title:'วันครู',type:'holiday'},
-  {date:'2026-02-14',title:'วันวาเลนไทน์',type:'holiday'},
-  {date:'2026-02-17',title:'วันตรุษจีน',type:'holiday'},
-  {date:'2026-02-18',title:'วันตรุษจีน (วันที่ 2)',type:'holiday'},
-  {date:'2026-02-19',title:'วันตรุษจีน (วันที่ 3)',type:'holiday'},
-  {date:'2026-03-03',title:'วันมาฆบูชา',type:'holiday'},
-  {date:'2026-04-06',title:'วันจักรี',type:'holiday'},
-  {date:'2026-04-13',title:'วันสงกรานต์',type:'holiday'},
-  {date:'2026-04-14',title:'วันสงกรานต์',type:'holiday'},
-  {date:'2026-04-15',title:'วันสงกรานต์',type:'holiday'},
-  {date:'2026-05-01',title:'วันแรงงานแห่งชาติ',type:'holiday'},
-  {date:'2026-05-04',title:'วันฉัตรมงคล',type:'holiday'},
-  {date:'2026-05-13',title:'วันพืชมงคล',type:'holiday'},
-  {date:'2026-05-31',title:'วันวิสาขบูชา',type:'holiday'},
-  {date:'2026-06-01',title:'วันหยุดชดเชยวันวิสาขบูชา',type:'holiday'},
-  // REMINDERS — past = done
-  {date:'2025-12-31',title:'ส่งของล่วงหน้า',type:'remind',time:'ทั้งวัน'},
-  {date:'2026-05-16',title:'จ่ายค่าเน็ต 15฿ 150MB',type:'remind',time:'ทั้งวัน'},
-  {date:'2026-05-17',title:'ค่าเน็ต GOMO 259 บาท',type:'remind',time:'ทั้งวัน'},
-  {date:'2026-05-20',title:'ส่งยอดให้ นฤมล',type:'remind',time:'08:30–09:30'},
-  {date:'2026-05-26',title:'ประชุมหัวหน้า',type:'remind',time:'ทั้งวัน'},
-  {date:'2026-05-27',title:'ค่านาฬิกา / เน็ตบ้าน / โทรศัพท์ทรู',type:'remind',time:'ทั้งวัน',recurring:'ทุกเดือน 27'},
-  {date:'2026-05-30',title:'ค่าเน็ตเหมา 33 บาท',type:'remind',time:'ทั้งวัน',recurring:'ทุกเดือน 28'},
-];
+  topProducts: [
+    { name:'มาม่าหมูสับ', sold:142, revenue:994, color:'#d4ff00' },
+    { name:'น้ำดื่ม 600ml', sold:98, revenue:588, color:'#00f5ff' },
+    { name:'ขนมปัง 7วัน', sold:67, revenue:1005, color:'#ff6b00' },
+    { name:'โค้ก 325ml', sold:54, revenue:810, color:'#ff2d78' },
+    { name:'บิสกิตโอรีโอ', sold:41, revenue:615, color:'#b44dff' },
+  ],
 
-allEvents.forEach(e => {
-  const d = pd(e.date);
-  e._date = d;
-  e._done = isPast(d);
-  e._today = isToday(d);
-});
-
-// ── HEADER DATE ──
-document.getElementById('todayLabel').innerHTML =
-  `วัน${DAYS_FULL[TODAY.getDay()]}ที่ ${TODAY.getDate()} ${MONTHS[TODAY.getMonth()]} ${TODAY.getFullYear()+543}`;
-
-// ── STATS ──
-function renderStats(){
-  const done = allEvents.filter(e=>e._done).length;
-  const upcoming = allEvents.filter(e=>!e._done && !e._today).length;
-  const todayItems = allEvents.filter(e=>e._today).length;
-  const reminders = allEvents.filter(e=>e.type==='remind').length;
-  const stats = [
-    {icon:'✅',num:done,label:'เสร็จแล้ว',color:'#4a5568',glow:'#718096'},
-    {icon:'📌',num:todayItems,label:'วันนี้',color:'var(--g1)',glow:'var(--g1)'},
-    {icon:'🔔',num:reminders,label:'แจ้งเตือนทั้งหมด',color:'var(--orange)',glow:'var(--orange)'},
-    {icon:'🗓',num:upcoming,label:'กำลังจะมาถึง',color:'var(--g2)',glow:'var(--g2)'},
-  ];
-  document.getElementById('statsRow').innerHTML = stats.map(s=>`
-    <div class="stat">
-      <div class="stat-glow" style="background:${s.glow}"></div>
-      <div class="stat-icon">${s.icon}</div>
-      <div class="stat-num" style="color:${s.color}">${s.num}</div>
-      <div class="stat-label">${s.label}</div>
-    </div>`).join('');
-  // progress
-  const total = allEvents.length;
-  const pct = Math.round(done/total*100);
-  document.getElementById('progPct').textContent = pct+'%';
-  setTimeout(()=>document.getElementById('progFill').style.width=pct+'%',200);
-}
-renderStats();
-
-// ── EVENT LIST ──
-const COLOR = {
-  holiday:{ bar:'var(--yellow)', tag:'rgba(255,214,10,0.12)', tagC:'var(--yellow)', label:'หยุด' },
-  remind: { bar:'var(--orange)', tag:'rgba(255,107,53,0.12)', tagC:'var(--orange)', label:'แจ้งเตือน' },
+  stockAlerts: [
+    { name:'มาม่าหมูสับ', current:3, min:5, status:'danger' },
+    { name:'น้ำปลาทิพรส', current:4, min:5, status:'danger' },
+    { name:'ข้าวสารถุง 1kg', current:6, min:5, status:'warn' },
+    { name:'น้ำดื่ม 600ml', current:24, min:10, status:'ok' },
+    { name:'บิสกิตโอรีโอ', current:15, min:5, status:'ok' },
+  ]
 };
-let curFilter = 'all';
 
-const filters = [
-  {id:'all',label:'ทั้งหมด'},
-  {id:'upcoming',label:'กำลังจะมา'},
-  {id:'today',label:'วันนี้'},
-  {id:'done',label:'เสร็จแล้ว ✓',cls:'done-btn'},
-  {id:'holiday',label:'วันหยุด'},
-  {id:'remind',label:'แจ้งเตือน'},
-];
-document.getElementById('filterBar').innerHTML = filters.map(f=>
-  `<button class="fb ${f.cls||''} ${f.id==='all'?'active':''}" onclick="setFilter('${f.id}',this)">${f.label}</button>`
-).join('');
+// ============================================================
 
-function setFilter(id, btn){
-  curFilter=id;
-  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderList();
+function fmt(n) {
+  if (n >= 1000) return (n/1000).toFixed(1) + 'k';
+  return n.toLocaleString();
 }
 
-function renderList(){
-  let data = [...allEvents].sort((a,b)=>a._date-b._date);
-  if(curFilter==='upcoming') data = data.filter(e=>!e._done && !e._today);
-  else if(curFilter==='today') data = data.filter(e=>e._today);
-  else if(curFilter==='done') data = data.filter(e=>e._done);
-  else if(curFilter==='holiday') data = data.filter(e=>e.type==='holiday');
-  else if(curFilter==='remind') data = data.filter(e=>e.type==='remind');
+function renderAll(d) {
+  // Big stats
+  document.querySelector('#today-sales span').textContent = fmt(d.todaySales);
+  document.getElementById('today-count').textContent = d.todayCount + ' รายการ';
+  const todayMargin = d.todaySales > 0 ? Math.round(d.todayProfit/d.todaySales*100) : 0;
+  document.querySelector('#today-profit span').textContent = fmt(d.todayProfit);
+  document.getElementById('profit-margin').textContent = 'margin ' + todayMargin + '%';
+  document.querySelector('#month-sales span').textContent = fmt(d.monthSales);
+  document.querySelector('#month-profit span').textContent = fmt(d.monthProfit);
+  document.getElementById('expense-sub').textContent = 'หักจ่าย ฿' + fmt(d.monthExpense);
 
-  document.getElementById('countBadge').textContent = data.length + ' รายการ';
+  // Mini
+  document.getElementById('total-products').textContent = d.totalProducts;
+  document.getElementById('low-stock-count').textContent = d.lowStockCount;
+  document.getElementById('stock-value').textContent = '฿' + fmt(d.stockValue);
 
-  // separate done vs active
-  const active = data.filter(e=>!e._done);
-  const done   = data.filter(e=>e._done);
+  // Meter
+  const netProfit = d.monthSales - d.monthExpense;
+  const marginPct = d.monthSales > 0 ? Math.round(netProfit/d.monthSales*100) : 0;
+  document.getElementById('margin-pct').textContent = marginPct + '%';
+  document.getElementById('total-income').textContent = '฿' + fmt(d.monthSales);
+  document.getElementById('total-expense').textContent = '฿' + fmt(d.monthExpense);
+  document.getElementById('net-profit').textContent = '฿' + fmt(netProfit);
+  setTimeout(() => {
+    document.getElementById('meter-fill').style.width = Math.min(marginPct * 2, 100) + '%';
+  }, 300);
 
-  let html = '';
-  let lastMonth = null;
-
-  function renderGroup(arr, showDoneLabel){
-    if(!arr.length) return '';
-    let out = '';
-    if(showDoneLabel) out += `<div class="done-section-label">เสร็จแล้ว ${arr.length} รายการ</div>`;
-    arr.forEach((e,i)=>{
-      const mk = `${e._date.getFullYear()}-${e._date.getMonth()}`;
-      if(!showDoneLabel && mk!==lastMonth){
-        lastMonth=mk;
-        out+=`<div class="month-sep">${MONTHS[e._date.getMonth()]} ${e._date.getFullYear()+543}</div>`;
-      }
-      const c = COLOR[e.type]||COLOR.holiday;
-      const diffDays = Math.ceil((e._date-TODAY)/86400000);
-      const chips = [];
-      if(e._today) chips.push(`<span class="chip" style="background:rgba(0,245,160,0.15);color:var(--g1)">วันนี้!</span>`);
-      if(e.time && e.time!=='ทั้งวัน') chips.push(`<span class="chip" style="background:var(--glass2);color:var(--muted2)">${e.time}</span>`);
-      if(e.recurring) chips.push(`<span class="chip" style="background:rgba(191,90,242,0.12);color:var(--purple)">🔄 ${e.recurring}</span>`);
-
-      out += `<div class="eitem ${e._done?'done':''} ${e._today?'is-today':''}" style="animation-delay:${i*0.04}s">
-        <div class="edate">
-          <div class="day" style="${e._done?'color:var(--done-text)':''}">${String(e._date.getDate()).padStart(2,'0')}</div>
-          <div class="dow">${DOWS[e._date.getDay()]}</div>
-        </div>
-        <div class="ebar" style="background:${e._done?'var(--done)':c.bar};${e._done?'':'box-shadow:0 0 8px '+c.bar}"></div>
-        <div class="einfo">
-          <div class="ename">${e.title}</div>
-          <div class="emeta">${chips.join('')}</div>
-        </div>
-        <span class="etag" style="background:${e._done?'rgba(255,255,255,0.04)':c.tag};color:${e._done?'var(--muted)':c.tagC};${e._done?'':'border:1px solid '+c.tagC+'44'}">${e._done?'✓ done':c.label}</span>
-      </div>`;
-    });
-    return out;
-  }
-
-  if(curFilter==='all'){
-    lastMonth=null;
-    html = renderGroup(active,false) + renderGroup(done,true);
-  } else if(curFilter==='done'){
-    html = renderGroup(done,false);
-  } else {
-    lastMonth=null;
-    html = renderGroup(active,false) + renderGroup(done,done.length>0);
-  }
-
-  if(!html) html='<div style="padding:40px;text-align:center;color:var(--muted);font-size:14px">ไม่มีรายการ</div>';
-  document.getElementById('eventList').innerHTML = html;
-}
-renderList();
-
-// ── REMIND SIDEBAR ──
-function renderRemindCards(){
-  const reminders = allEvents.filter(e=>e.type==='remind')
-    .sort((a,b)=>a._date-b._date);
-  document.getElementById('remindBadge').textContent = reminders.filter(e=>!e._done).length + ' รายการ';
-
-  const iconMap = {
-    'เน็ต':'📶','ค่าน':'💳','ส่ง':'📦','ประชุม':'💼','นาฬิกา':'⌚',
-  };
-  function getIcon(title){
-    for(const [k,v] of Object.entries(iconMap)) if(title.includes(k)) return v;
-    return '🔔';
-  }
-
-  document.getElementById('remindCards').innerHTML = reminders.map(e=>{
-    const diff = Math.ceil((e._date-TODAY)/86400000);
-    let diffHtml='';
-    if(e._done) diffHtml=`<div class="rcard-diff overdue">✓ เสร็จแล้ว</div>`;
-    else if(e._today) diffHtml=`<div class="rcard-diff today-label">⚡ วันนี้!</div>`;
-    else diffHtml=`<div class="rcard-diff upcoming">อีก ${diff} วัน</div>`;
-
-    const bgColor = e._done?'rgba(255,255,255,0.04)':e._today?'rgba(0,245,160,0.1)':'rgba(255,107,53,0.1)';
-    return `<div class="rcard ${e._done?'done-card':''}">
-      <div class="rcard-icon" style="background:${bgColor}">${getIcon(e.title)}</div>
-      <div class="rcard-body">
-        <div class="rcard-title ${e._done?'done-title':''}">${e.title}</div>
-        <div class="rcard-date">${fmtDate(e._date)}</div>
-        ${diffHtml}
+  // Chart
+  const maxVal = Math.max(...d.chartData.map(c => Math.max(c.income, c.expense)));
+  const barsEl = document.getElementById('chart-bars');
+  barsEl.innerHTML = '';
+  d.chartData.forEach((c, i) => {
+    const ih = Math.round((c.income / maxVal) * 90);
+    const eh = Math.round((c.expense / maxVal) * 90);
+    const group = document.createElement('div');
+    group.className = 'bar-group';
+    group.innerHTML = `
+      <div class="bars">
+        <div class="bar bar-income" style="height:${ih}px;transition-delay:${i*0.06}s"></div>
+        <div class="bar bar-expense" style="height:${eh}px;transition-delay:${i*0.06+0.03}s"></div>
       </div>
-    </div>`;
-  }).join('');
-}
-renderRemindCards();
+      <div class="bar-label">${c.day}</div>
+    `;
+    barsEl.appendChild(group);
+  });
 
-// ── MINI CALENDAR ──
-let cy=2026,cm=4;
-function renderCal(){
-  document.getElementById('calTitle').textContent=`${MONTHS[cm]} ${cy+543}`;
-  const first=new Date(cy,cm,1).getDay();
-  const dim=new Date(cy,cm+1,0).getDate();
-  const prev=new Date(cy,cm,0).getDate();
-  const holidaySet=new Set(allEvents.filter(e=>e.type==='holiday').map(e=>e.date));
-  const eventSet=new Set(allEvents.filter(e=>e.type==='remind').map(e=>e.date));
-  const doneSet=new Set(allEvents.filter(e=>e._done).map(e=>e.date));
+  // Top products
+  const maxRev = d.topProducts[0]?.revenue || 1;
+  const prodEl = document.getElementById('top-products');
+  prodEl.innerHTML = '';
+  d.topProducts.forEach((p, i) => {
+    const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n';
+    const pct = Math.round(p.revenue / maxRev * 100);
+    const el = document.createElement('div');
+    el.className = 'prod-item';
+    el.innerHTML = `
+      <div class="prod-rank ${rankClass}">${i+1}</div>
+      <div class="prod-info">
+        <div class="prod-name">${p.name}</div>
+        <div class="prod-sub">ขาย ${p.sold} ชิ้น</div>
+      </div>
+      <div class="prod-bar-wrap">
+        <div class="prod-bar-bg">
+          <div class="prod-bar-fill" style="width:0%;background:${p.color}" data-w="${pct}"></div>
+        </div>
+      </div>
+      <div class="prod-val" style="color:${p.color}">฿${fmt(p.revenue)}</div>
+    `;
+    prodEl.appendChild(el);
+  });
+  setTimeout(() => {
+    document.querySelectorAll('.prod-bar-fill').forEach(el => {
+      el.style.width = el.dataset.w + '%';
+    });
+  }, 400);
 
-  let h='';
-  for(let i=first-1;i>=0;i--)
-    h+=`<div class="cday other">${prev-i}</div>`;
-  for(let d=1;d<=dim;d++){
-    const ds=`${cy}-${String(cm+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isTod=cy===2026&&cm===4&&d===20;
-    const isH=holidaySet.has(ds);
-    const isE=eventSet.has(ds);
-    const isDone=doneSet.has(ds);
-    h+=`<div class="cday ${isTod?'today':''} ${isH&&!isTod?'holiday':''} ${isE?'has-event':''} ${isDone&&!isTod?'done-day':''}">${d}</div>`;
-  }
-  const total=Math.ceil((first+dim)/7)*7;
-  for(let d=1;d<=total-first-dim;d++)
-    h+=`<div class="cday other">${d}</div>`;
-  document.getElementById('calGrid').innerHTML=h;
+  // Stock alerts
+  const alertEl = document.getElementById('stock-alerts');
+  alertEl.innerHTML = '';
+  const dangerCount = d.stockAlerts.filter(a => a.status === 'danger').length;
+  document.getElementById('alert-badge').textContent = dangerCount > 0 ? `${dangerCount} วิกฤต` : 'ปกติ';
+  d.stockAlerts.forEach(a => {
+    const icon = a.status === 'danger' ? '🔴' : a.status === 'warn' ? '🟡' : '🟢';
+    const pillClass = a.status === 'danger' ? 'stock-danger' : a.status === 'warn' ? 'stock-warn' : 'stock-ok';
+    const label = a.status === 'danger' ? 'ใกล้หมด!' : a.status === 'warn' ? 'เหลือน้อย' : 'ปกติ';
+    const el = document.createElement('div');
+    el.className = 'alert-item';
+    el.innerHTML = `
+      <div class="alert-icon">${icon}</div>
+      <div class="alert-info">
+        <div class="alert-name">${a.name}</div>
+        <div class="alert-sub">เหลือ ${a.current} / ขั้นต่ำ ${a.min}</div>
+      </div>
+      <div class="stock-pill ${pillClass}">${label}</div>
+    `;
+    alertEl.appendChild(el);
+  });
 }
-function prevM(){cm--;if(cm<0){cm=11;cy--;}renderCal();}
-function nextM(){cm++;if(cm>11){cm=0;cy++;}renderCal();}
-renderCal();
+
+function refreshData() {
+  const btn = document.querySelector('.refresh-btn');
+  btn.textContent = '⏳  กำลังโหลด...';
+  btn.disabled = true;
+  setTimeout(() => {
+    renderAll(DEMO_DATA);
+    btn.textContent = '↻  รีเฟรชข้อมูล';
+    btn.disabled = false;
+  }, 800);
+}
+
+// Clock
+function updateClock() {
+  const now = new Date();
+  const d = String(now.getDate()).padStart(2,'0');
+  const m = String(now.getMonth()+1).padStart(2,'0');
+  const y = now.getFullYear();
+  const h = String(now.getHours()).padStart(2,'0');
+  const mi = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('clock').textContent = `${d}/${m}/${y}  ${h}:${mi}:${s}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Init
+renderAll(DEMO_DATA);
 </script>
 </body>
 </html>
