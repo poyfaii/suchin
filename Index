@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>SHOPMASTER POS</title>
+
+  <!-- TAILWIND -->
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- CHART -->
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- BARCODE -->
+
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <!-- FONT -->
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+
+    *{
+      font-family:'Noto Sans Thai',sans-serif;
+      box-sizing:border-box;
+    }
+
+    body{
+      margin:0;
+      background:#0f172a;
+      color:#fff;
+    }
+
+    .page{
+      display:none;
+    }
+
+    .page.active{
+      display:block;
+    }
+
+    .card{
+      background:#111827;
+      border-radius:18px;
+      padding:16px;
+      margin-bottom:16px;
+      border:1px solid #1f2937;
+    }
+
+    .input{
+      width:100%;
+      padding:12px;
+      margin-top:6px;
+      margin-bottom:12px;
+      border:none;
+      border-radius:12px;
+      background:#1e293b;
+      color:#fff;
+      outline:none;
+    }
+
+    .btn{
+      width:100%;
+      padding:14px;
+      border:none;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:700;
+    }
+
+    .btn-primary{
+      background:#2563eb;
+      color:#fff;
+    }
+
+    .btn-success{
+      background:#16a34a;
+      color:#fff;
+    }
+
+    .nav{
+      position:fixed;
+      bottom:0;
+      left:0;
+      right:0;
+      background:#111827;
+      display:flex;
+      padding:10px;
+      gap:10px;
+      border-top:1px solid #1f2937;
+    }
+
+    .nav button{
+      flex:1;
+      padding:12px;
+      border:none;
+      border-radius:12px;
+      background:#1e293b;
+      color:#fff;
+      font-weight:700;
+    }
+
+    .nav button.active{
+      background:#2563eb;
+    }
+
+    .stat{
+      font-size:24px;
+      font-weight:700;
+      margin-top:8px;
+    }
+
+    #toast{
+      position:fixed;
+      bottom:90px;
+      left:50%;
+      transform:translateX(-50%);
+      background:#111827;
+      border:1px solid #334155;
+      padding:12px 18px;
+      border-radius:12px;
+      display:none;
+      z-index:9999;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <!-- HEADER -->
+
+  <div
+    style="
+      position:sticky;
+      top:0;
+      background:#111827;
+      padding:16px;
+      border-bottom:1px solid #1f2937;
+      z-index:100;
+    "
+  >
+
+    <div
+      style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+      "
+    >
+
+      <div>
+
+        <div
+          style="
+            font-size:22px;
+            font-weight:700;
+          "
+        >
+          🛒 SHOPMASTER
+        </div>
+
+        <div
+          id="today-date"
+          style="
+            font-size:12px;
+            color:#94a3b8;
+          "
+        >
+        </div>
+
+      </div>
+
+      <button
+        onclick="loadDashboard()"
+        class="btn"
+        style="
+          width:auto;
+          padding:10px 16px;
+          background:#1e293b;
+          color:#fff;
+        "
+      >
+        🔄 รีเฟรช
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- CONTENT -->
+
+  <div
+    style="
+      padding:16px;
+      padding-bottom:100px;
+      max-width:520px;
+      margin:auto;
+    "
+  >
+
+    <!-- DASHBOARD -->
+
+    <div
+      id="page-dashboard"
+      class="page active"
+    >
+
+      <div class="card">
+
+        <div>💰 ยอดขายวันนี้</div>
+
+        <div
+          id="today-sales"
+          class="stat"
+        >
+          0
+        </div>
+
+      </div>
+
+      <div class="card">
+
+        <div>📈 กำไรวันนี้</div>
+
+        <div
+          id="today-profit"
+          class="stat"
+        >
+          0
+        </div>
+
+      </div>
+
+      <div class="card">
+
+        <div>🧾 รายจ่ายเดือนนี้</div>
+
+        <div
+          id="month-expense"
+          class="stat"
+        >
+          0
+        </div>
+
+      </div>
+
+      <div class="card">
+
+        <div>📦 มูลค่าสต๊อก</div>
+
+        <div
+          id="stock-value"
+          class="stat"
+        >
+          0
+        </div>
+
+      </div>
+
+      <div class="card">
+
+        <canvas id="chart"></canvas>
+
+      </div>
+
+    </div>
+
+    <!-- MANAGE -->
+
+    <div
+      id="page-manage"
+      class="page"
+    >
+
+      <!-- PRODUCT -->
+
+      <div class="card">
+
+        <div
+          style="
+            font-size:18px;
+            font-weight:700;
+            margin-bottom:16px;
+          "
+        >
+          ➕ เพิ่มสินค้า
+        </div>
+
+        <input
+          id="p-barcode"
+          class="input"
+          placeholder="Barcode"
+        />
+
+        <input
+          id="p-name"
+          class="input"
+          placeholder="ชื่อสินค้า"
+        />
+
+        <input
+          id="p-cost"
+          type="number"
+          class="input"
+          placeholder="ต้นทุน"
+        />
+
+        <input
+          id="p-price"
+          type="number"
+          class="input"
+          placeholder="ราคาขาย"
+        />
+
+        <input
+          id="p-stock"
+          type="number"
+          class="input"
+          placeholder="Stock"
+        />
+
+        <button
+          onclick="submitProduct()"
+          class="btn btn-primary"
+        >
+          💾 บันทึกสินค้า
+        </button>
+
+      </div>
+
+      <!-- SALE -->
+
+      <div class="card">
+
+        <div
+          style="
+            font-size:18px;
+            font-weight:700;
+            margin-bottom:16px;
+          "
+        >
+          💳 บันทึกการขาย
+        </div>
+
+        <input
+          id="sale-barcode"
+          class="input"
+          placeholder="Barcode"
+          oninput="debounceLookup(this.value)"
+        />
+
+        <div
+          id="product-preview"
+          style="
+            display:none;
+            background:#1e293b;
+            padding:12px;
+            border-radius:12px;
+            margin-bottom:12px;
+          "
+        >
+
+          <div
+            id="preview-name"
+            style="font-weight:700;"
+          >
+          </div>
+
+          <div
+            id="preview-detail"
+            style="
+              font-size:12px;
+              color:#94a3b8;
+            "
+          >
+          </div>
+
+        </div>
+
+        <input
+          id="sale-price"
+          type="number"
+          class="input"
+          placeholder="ราคาขาย"
+        />
+
+        <input
+          id="sale-qty"
+          type="number"
+          class="input"
+          value="1"
+          placeholder="จำนวน"
+        />
+
+        <div
+          style="
+            background:#1e293b;
+            padding:12px;
+            border-radius:12px;
+            margin-bottom:12px;
+          "
+        >
+
+          ยอดรวม:
+
+          <span id="sale-total">
+            0 บาท
+          </span>
+
+        </div>
+
+        <button
+          onclick="submitSale()"
+          class="btn btn-success"
+        >
+          ✅ บันทึกการขาย
+        </button>
+
+      </div>
+
+      <!-- EXPENSE -->
+
+      <div class="card">
+
+        <div
+          style="
+            font-size:18px;
+            font-weight:700;
+            margin-bottom:16px;
+          "
+        >
+          🧾 ค่าใช้จ่าย
+        </div>
+
+        <select
+          id="exp-type"
+          class="input"
+        >
+
+          <option value="ค่าน้ำ/ไฟ">
+            ค่าน้ำ/ไฟ
+          </option>
+
+          <option value="ค่าเช่า">
+            ค่าเช่า
+          </option>
+
+          <option value="ค่าขนส่ง">
+            ค่าขนส่ง
+          </option>
+
+          <option value="ค่าแรง">
+            ค่าแรง
+          </option>
+
+          <option value="อื่นๆ">
+            อื่นๆ
+          </option>
+
+        </select>
+
+        <input
+          id="exp-detail"
+          class="input"
+          placeholder="รายละเอียด"
+        />
+
+        <input
+          id="exp-amount"
+          type="number"
+          class="input"
+          placeholder="จำนวนเงิน"
+        />
+
+        <input
+          id="exp-recorder"
+          class="input"
+          placeholder="ผู้บันทึก"
+        />
+
+        <button
+          onclick="submitExpense()"
+          class="btn btn-primary"
+        >
+          💾 บันทึกค่าใช้จ่าย
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- NAV -->
+
+  <div class="nav">
+
+    <button
+      id="nav-dashboard"
+      class="active"
+      onclick="switchPage('dashboard')"
+    >
+      📊 Dashboard
+    </button>
+
+    <button
+      id="nav-manage"
+      onclick="switchPage('manage')"
+    >
+      📦 จัดการ
+    </button>
+
+  </div>
+
+  <!-- TOAST -->
+
+  <div id="toast"></div>
+
+  <!-- SCRIPT -->
+
+  <script>
+
+    let chart = null;
+
+    // =========================================
+    // INIT
+    // =========================================
+
+    window.onload = () => {
+
+      document.getElementById("today-date")
+        .innerText =
+          new Date()
+            .toLocaleDateString("th-TH");
+
+      loadDashboard();
+
+      initCalculator();
+    };
+
+    // =========================================
+    // SWITCH PAGE
+    // =========================================
+
+    function switchPage(page){
+
+      document
+        .querySelectorAll(".page")
+        .forEach(el => el.classList.remove("active"));
+
+      document
+        .querySelectorAll(".nav button")
+        .forEach(el => el.classList.remove("active"));
+
+      document
+        .getElementById("page-" + page)
+        .classList.add("active");
+
+      document
+        .getElementById("nav-" + page)
+        .classList.add("active");
+
+      if(page === "dashboard"){
+        loadDashboard();
+      }
+    }
+
+    // =========================================
+    // DASHBOARD
+    // =========================================
+
+    function loadDashboard(){
+
+      google.script.run
+
+        .withSuccessHandler(data => {
+
+          document.getElementById("today-sales")
+            .innerText =
+              Number(data.todaySales)
+                .toLocaleString("th-TH");
+
+          document.getElementById("today-profit")
+            .innerText =
+              Number(data.todayProfit)
+                .toLocaleString("th-TH");
+
+          document.getElementById("month-expense")
+            .innerText =
+              Number(data.monthExpense)
+                .toLocaleString("th-TH");
+
+          document.getElementById("stock-value")
+            .innerText =
+              Number(data.stockValue)
+                .toLocaleString("th-TH");
+
+        })
+
+        .getDashboardData();
+    }
+
+    // =========================================
+    // PRODUCT
+    // =========================================
+
+    function submitProduct(){
+
+      const data = {
+
+        barcode:
+          document
+            .getElementById("p-barcode")
+            .value
+            .trim(),
+
+        name:
+          document
+            .getElementById("p-name")
+            .value
+            .trim(),
+
+        cost:
+          document
+            .getElementById("p-cost")
+            .value,
+
+        price:
+          document
+            .getElementById("p-price")
+            .value,
+
+        stock:
+          document
+            .getElementById("p-stock")
+            .value
+      };
+
+      google.script.run
+
+        .withSuccessHandler(res => {
+
+          showToast(res.message);
+
+        })
+
+        .registerNewProduct(data);
+    }
+
+    // =========================================
+    // SALE
+    // =========================================
+
+    function initCalculator(){
+
+      ["sale-price","sale-qty"]
+
+        .forEach(id => {
+
+          document
+            .getElementById(id)
+            .addEventListener(
+              "input",
+              updateSaleTotal
+            );
+
+        });
+    }
+
+    function updateSaleTotal(){
+
+      const price =
+        Number(
+          document
+            .getElementById("sale-price")
+            .value
+        ) || 0;
+
+      const qty =
+        Number(
+          document
+            .getElementById("sale-qty")
+            .value
+        ) || 0;
+
+      document
+        .getElementById("sale-total")
+        .innerText =
+          (price * qty)
+            .toLocaleString("th-TH")
+          + " บาท";
+    }
+
+    let lookupTimer = null;
+
+    function debounceLookup(barcode){
+
+      clearTimeout(lookupTimer);
+
+      lookupTimer = setTimeout(() => {
+
+        lookupSaleProduct(barcode);
+
+      },300);
+    }
+
+    function lookupSaleProduct(barcode){
+
+      if(!barcode || barcode.length < 3){
+
+        document
+          .getElementById("product-preview")
+          .style.display = "none";
+
+        return;
+      }
+
+      google.script.run
+
+        .withSuccessHandler(product => {
+
+          if(product.found){
+
+            document
+              .getElementById("product-preview")
+              .style.display = "block";
+
+            document
+              .getElementById("preview-name")
+              .innerText =
+                product.name;
+
+            document
+              .getElementById("preview-detail")
+              .innerText =
+                "ราคา ฿" +
+                product.price +
+                " | Stock " +
+                product.stockLeft;
+
+            document
+              .getElementById("sale-price")
+              .value =
+                product.price;
+
+            updateSaleTotal();
+
+          } else {
+
+            document
+              .getElementById("product-preview")
+              .style.display = "none";
+          }
+
+        })
+
+        .getProductByBarcode(barcode);
+    }
+
+    function submitSale(){
+
+      const data = {
+
+        barcode:
+          document
+            .getElementById("sale-barcode")
+            .value
+            .trim(),
+
+        price:
+          document
+            .getElementById("sale-price")
+            .value,
+
+        qty:
+          document
+            .getElementById("sale-qty")
+            .value
+      };
+
+      google.script.run
+
+        .withSuccessHandler(res => {
+
+          showToast(res.message);
+
+          loadDashboard();
+
+        })
+
+        .recordSale(data);
+    }
+
+    // =========================================
+    // EXPENSE
+    // =========================================
+
+    function submitExpense(){
+
+      const data = {
+
+        type:
+          document
+            .getElementById("exp-type")
+            .value,
+
+        detail:
+          document
+            .getElementById("exp-detail")
+            .value,
+
+        amount:
+          document
+            .getElementById("exp-amount")
+            .value,
+
+        recorder:
+          document
+            .getElementById("exp-recorder")
+            .value
+      };
+
+      google.script.run
+
+        .withSuccessHandler(res => {
+
+          showToast(res.message);
+
+          loadDashboard();
+
+        })
+
+        .addExpense(data);
+    }
+
+    // =========================================
+    // TOAST
+    // =========================================
+
+    let toastTimer = null;
+
+    function showToast(msg){
+
+      const toast =
+        document.getElementById("toast");
+
+      toast.innerText = msg;
+
+      toast.style.display = "block";
+
+      clearTimeout(toastTimer);
+
+      toastTimer = setTimeout(() => {
+
+        toast.style.display = "none";
+
+      },3000);
+    }
+
+  </script>
+
+</body>
+</html>
